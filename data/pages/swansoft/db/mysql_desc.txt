@@ -1,4 +1,176 @@
+====== SwanSoft 产品数据字典 ======
 
+===== swan_soft 数据库 =====
 
-^ 测试 | 测试1 |
-^ sasa | sasas |
+====device====
+^ 表名 | device |
+^ 描述 | 监控的设备信息表 |
+^ Engine | InnoDB |
+^ 编码 | utf8 |
+^ 主键 | `device_id`|
+
+^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
+| device_id | int | false | 11 |  | true | true |
+| ::: | 设备 id ||||||
+| device_name | varchar | false | 255 |  |   |   |
+| ::: | 设备名称(唯一) ||||||
+| device_display_name | varchar | false | 255 |  |   |   |
+| ::: | 设备显示名称 ||||||
+| host | varchar | false | 32 |  |   |   |
+| ::: | 设备的主机名 ||||||
+| port | smallint | true | 6 | 161 |   | true |
+| ::: | 设备的端口号，默认是  SNMP 的默认端口：161 ||||||
+| snmp_version | tinyint | true | 2 | 0 |   | true |
+| ::: | SNMP 协议的版本 0:VERSION_1, 1:VERSION_2 2:VERSION_3 ||||||
+| snmp_method | tinyint | true | 2 | 0 |   | true |
+| ::: | 通过 SNMP 获取数据的方式 0: EXEC 方式即直接是系统调用 1: EXT 方式( PHP 的内置扩展，需要有扩展支持) ||||||
+| snmp_protocol | tinyint | true | 2 | 0 |   | true |
+| ::: | SNMP 的通讯协议 0: NET 方式 1: UDP 方式 ||||||
+| snmp_community | varchar | true | 32 | public |   |   |
+| ::: | SNMP 的共同体，只有 V1 和 V2 版本有效，默认 public ||||||
+| snmp_timeout | int | true | 6 | 5000 |   | true |
+| ::: | SNMP 连接超时时间，单位是微秒，默认是 5s ||||||
+| snmp_retries | tinyint | true | 2 | 3 |   | true |
+| ::: | SNMP 连接失败后重试次数，默认 3 次 ||||||
+| security_name | varchar | true | 32 |  |   |   |
+| ::: | 认证的用户名 ||||||
+| security_level | tinyint | true | 2 | 0 |   | true |
+| ::: | 认证的安全等级 0: noAuthNoPriv 1:authNoPriv 2:authPriv ||||||
+| auth_protocol | tinyint | true | 2 | 0 |   | true |
+| ::: | 认证的协议算法 0: MD5  1: SHA ||||||
+| auth_passphrase | varchar | true | 32 |  |   |   |
+| ::: | 认证的公钥 ||||||
+| priv_protocol | tinyint | true | 2 | 0 |   | true |
+| ::: | 密钥的协议算法 0: DES  1: AES ||||||
+| priv_passphrase | varchar | true | 32 |  |   |   |
+| ::: | 认证密钥 ||||||
+====device_project====
+^ 表名 | device_project |
+^ 描述 | 记录监控设备的每个项目rrd信息 |
+^ Engine | InnoDB |
+^ 编码 | utf8 |
+^ 主键 | `project_id`|
+^ 索引 | `device_id`|
+
+^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
+| project_id | int | false | 11 |  | true | true |
+| ::: | 项目 id ||||||
+| project_name | varchar | false | 64 |  |   |   |
+| ::: | 监控设备项目名称 ||||||
+| device_id | int | false | 11 | 0 |   | true |
+| ::: | 关联 device.device_id ||||||
+| step | int | true | 6 | 300 |   | true |
+| ::: | rrd刷新周期 默认值 300s ||||||
+| start_time | int | true | 11 |  |   | true |
+| ::: | 数据库的起始时间 默认是now() - 10s ||||||
+====rrd_ds====
+^ 表名 | rrd_ds |
+^ 描述 | 记录每个监控项目对应的多个字段属性 |
+^ Engine | InnoDB |
+^ 编码 | utf8 |
+^ 主键 | `ds_id`|
+^ 索引 | `project_id`,`device_id`|
+^ 索引 | `project_id`|
+
+^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
+| ds_id | int | false | 11 |  | true | true |
+| ::: | DS id ||||||
+| ds_name | varchar | false | 64 |  |   |   |
+| ::: | 属性名 规则和变量命名一样，限制不能输入中文，这个是有意义的字段 ||||||
+| project_id | int | false | 11 | 0 |   | true |
+| ::: | 关联 device_project.project_id ||||||
+| device_id | int | false | 11 | 0 |   | true |
+| ::: | 关联 device.device_id (可能以后会有意义) ||||||
+| get_method | tinyint | true | 2 | 0 |   | true |
+| ::: | 数据获取方式 0 :通过 SNMP 协议获取 1:通过其他方式，例如脚本等 ||||||
+| object_type | char | true | 32 |  |   |   |
+| ::: | 如果使用SNMP协议 传递的object类型 ||||||
+| object_id | varchar | true | 255 |  |   |   |
+| ::: | 如果使用SNMP协议 传递的object ids ||||||
+| source_type | tinyint | true | 2 | 0 |   | true |
+| ::: | 决定最后写入数据后rrd的运算规则 0 : GAUGE（默认值） 1 : COUNTER 2 : DERIVE 3 : ABSOLUTE ||||||
+| heart_time | int | true | 11 | 300 |   | true |
+| ::: | 心跳时间 ，如果超过这个时间还没有数据传递则默认赋值为 (UN) --UNKNOWN ||||||
+| min | varchar | true | 32 | U |   |   |
+| ::: | 传递数据的最小限制 默认不限制 ||||||
+| max | varchar | true | 32 | U |   |   |
+| ::: | 传递数据的最大限制 默认不限制 ||||||
+====rrd_rra====
+^ 表名 | rrd_rra |
+^ 描述 | 记录每个监控项目对数据的归档规则(合并数据的规则) |
+^ Engine | InnoDB |
+^ 编码 | utf8 |
+^ 主键 | `rra_id`|
+^ 索引 | `project_id`,`device_id`|
+^ 索引 | `project_id`|
+
+^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
+| rra_id | int | false | 11 |  | true | true |
+| ::: | RRA id ||||||
+| project_id | int | false | 11 | 0 |   | true |
+| ::: | 关联 device_project.project_id ||||||
+| device_id | int | false | 11 | 0 |   | true |
+| ::: | 关联 device.device_id (可能以后会有意义) ||||||
+| rra_cf | tinyint | true | 2 | 0 |   | true |
+| ::: | 归档策略算法 0 : AVERAGE 1:MIN 2:MAX 3:LAST ||||||
+| rra_xff | float | true | 11 | 0.5 |   |   |
+| ::: | xfiles factor 和unkown数据有关，很多资料都取0.5 (待研究) ||||||
+| steps | int | false | 11 |  |   | true |
+| ::: | 决定多少步长进行归档一次 ||||||
+| rows | int | false | 11 |  |   | true |
+| ::: | 归档的条数 ||||||
+====rrd_cdef====
+^ 表名 | rrd_cdef |
+^ 描述 | 记录绘制的图片规则中的中间变量运算 |
+^ Engine | InnoDB |
+^ 编码 | utf8 |
+^ 主键 | `cdef_id`|
+^ 索引 | `graph_id`|
+
+^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
+| cdef_id | int | false | 11 |  | true | true |
+| ::: | CDEF id ||||||
+| graph_id | int | false | 11 | 0 |   | true |
+| ::: | 关联 rrd_graph.graph_id ||||||
+| define_name | varchar | false | 32 |  |   |   |
+| ::: | 变量名称 ||||||
+| cdef_cf | varchar | false | 255 |  |   |   |
+| ::: | 算法该字段存取的逆波兰表达式 (当前先就这样了，以后尽量优化的不让用户直接输入逆波兰表达式) ||||||
+====rrd_line_area====
+^ 表名 | rrd_line_area |
+^ 描述 | 记录绘制的图片规则中的线条定义 |
+^ Engine | InnoDB |
+^ 编码 | utf8 |
+^ 主键 | `line_id`|
+^ 索引 | `graph_id`|
+
+^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
+| line_id | int | false | 11 |  | true | true |
+| ::: | 线条ID id ||||||
+| graph_id | int | false | 11 | 0 |   | true |
+| ::: | 关联 rrd_graph.graph_id ||||||
+| line_cate | tinyint | false | 2 | 0 |   | true |
+| ::: | 线条类型 0：AREA 1: LINE1 2: LINE2 3: LINE3 4: STACK ||||||
+| define_name | varchar | false | 32 |  |   |   |
+| ::: | 变量名称 ||||||
+| color | varchar | false | 32 |  |   |   |
+| ::: | 线条颜色 ||||||
+| legend | varchar | false | 32 |  |   |   |
+| ::: | 线条注释 对该颜色的提示，最后会写在图上的 ||||||
+====rrd_gprint====
+^ 表名 | rrd_gprint |
+^ 描述 | 记录线条中的这个极限值 |
+^ Engine | InnoDB |
+^ 编码 | utf8 |
+^ 主键 | `gprint_id`|
+^ 索引 | `line_id`|
+
+^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
+| gprint_id | int | false | 11 |  | true | true |
+| ::: | GPRINT id ||||||
+| line_id | int | false | 11 | 0 |   | true |
+| ::: | 关联 rrd_line_area.line_id ||||||
+| line_cf | tinyint | false | 2 | 0 |   | true |
+| ::: | 线条运算算法 0：AVERAGE 1: MIN 2: MAX 3: LAST ||||||
+| format | varchar | false | 32 |  |   |   |
+| ::: | 线条极限值注释 对该颜色的提示，最后会写在图上的 ||||||
