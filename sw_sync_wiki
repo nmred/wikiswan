@@ -1,0 +1,225 @@
+#!/usr/local/swan/opt/php/bin/php
+<?php
+/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4 foldmethod=marker: */
+// +---------------------------------------------------------------------------
+// | SWAN [ $_SWANBR_SLOGAN_$ ]
+// +---------------------------------------------------------------------------
+// | Copyright $_SWANBR_COPYRIGHT_$
+// +---------------------------------------------------------------------------
+// | Version  $_SWANBR_VERSION_$
+// +---------------------------------------------------------------------------
+// | Licensed ( $_SWANBR_LICENSED_URL_$ )
+// +---------------------------------------------------------------------------
+// | $_SWANBR_WEB_DOMAIN_$
+// +---------------------------------------------------------------------------
+
+require_once 'dev_core.php';
+require_once D_PATH_SWAN_LIB . 'iterator/sw_iterator_fetch_dir.class.php';
+require_once D_PATH_SWAN_LIB . 'sw_create_makefile.class.php';
+
+/**
++------------------------------------------------------------------------------
+* 同步 wiki 
++------------------------------------------------------------------------------
+* 
+* @package 
+* @version $_SWANBR_VERSION_$
+* @copyright $_SWANBR_COPYRIGHT_$
+* @author $_SWANBR_AUTHOR_$ 
++------------------------------------------------------------------------------
+*/
+class sw_sync_wiki
+{
+	// {{{ const
+
+	/**
+	 * 本地 WIKI 目录 
+	 * 
+	 * @var const
+	 */
+	const LOCAL_DIR = '/usr/local/wikiswan';
+
+	// }}}
+	// {{{ members
+
+	/**
+	 * 远程目录 
+	 * 
+	 * @var string
+	 * @access protected
+	 */
+	protected $__remote_dir = './';
+
+	/**
+	 * Makefile.ini的名称 
+	 * 
+	 * @var string
+	 * @access protected
+	 */
+	protected $__makefile_ini = 'Makefile.ini';
+
+	/**
+	 * 忽略的目录 
+	 * 
+	 * @var string
+	 * @access protected
+	 */
+	protected $__ignore_dir = array(
+		'.git/.',
+	);
+
+	// }}}
+	// {{{ functions
+	// {{{ public function __construct()
+
+	/**
+	 * 构造函数
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	public function __construct()
+	{
+		$this->__remote_dir = dirname(__FILE__);
+	}
+
+	// }}}
+	// {{{ public function run()
+
+	/**
+	 * 运行 
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	public function run()
+	{
+		$this->_create_makefile();	
+		$this->_create_makefile_ini();
+	}
+
+	// }}}
+	// {{{ protected function _create_makefile()
+
+	/**
+	 * 创建Makefile 
+	 * 
+	 * @access protected
+	 * @return void
+	 * @throw Exception
+	 */
+	protected function _create_makefile()
+	{
+		$make_dirs = $this->_get_dirs();
+		$current_dir = getcwd();
+		foreach ($make_dirs as $dir_name) {
+			$path_all = rtrim($this->__remote_dir, '/') . '/' .  $dir_name;
+			chdir($path_all);
+			$make_file = sw_create_makefile::factory('common');
+			$make_file->run();
+			chdir($current_dir);
+		}
+	}
+
+	// }}} 
+	// {{{ protected function _get_dirs()
+	
+	/**
+	 * 获取应该生成Makefile文件的目录 
+	 * 
+	 * @access protected
+	 * @return array
+	 */
+	protected function _get_dirs()
+	{
+		$make_dirs = array();
+		$sw_dir_iterator = new sw_iterator_fetch_dir($this->__remote_dir);
+		$sw_dir_iterator->set_ignore_dir($this->__ignore_dir);
+		foreach ($sw_dir_iterator as $key => $value) {
+			$filename = $value->getFilename();
+			if($filename == $this->__makefile_ini) {
+				$make_dirs[] = substr($key, 0, strlen($key)-(strlen($this->__makefile_ini) + 1));
+			}
+		}
+
+		return $make_dirs;
+	}
+
+	// }}}
+	// {{{ protected function _create_makefile_ini()
+
+	/**
+	 * 创建 Makefile.ini 文件
+	 * 
+	 * @access protected
+	 * @return void
+	 */
+	protected function _create_makefile_ini()
+	{
+		$sw_dir_iterator = new sw_iterator_fetch_dir($this->__remote_dir);
+		$sw_dir_iterator->set_ignore_dir($this->__ignore_dir);
+
+		foreach($sw_dir_iterator as $key => $value) {
+			$this->_rec_makefile_ini($value);
+		}
+	}
+
+	// }}}
+	// {{{ protected function _rec_makefile_ini()
+
+	/**
+	 * 递归创建 Makefile.ini 
+	 * 
+	 * @param mixed $file_path 
+	 * @access protected
+	 * @return void
+	 */
+	protected function _rec_makefile_ini($file_path)
+	{
+		while($this->__remote_dir !== $file_path) {
+			$file_path = dirname($file_path);
+			if (file_exists($file_path . '/Makefile.ini')) {
+				continue;	
+			}
+
+			$dir_name = ltrim(substr($file_path, strlen($this->__remote_dir)), '/');
+			if (false !== strpos($dir_name, '/')) {
+				$arr = explode('/', $dir_name);
+				foreach ($arr as &$value) {
+					$value = urlencode($value);
+				}
+				$dir_name = implode($arr, '/');
+			} else {
+				$dir_name = urlencode($dir_name);	
+			}		
+
+			$target_dir = rtrim(self::LOCAL_DIR, '/') . '/' . $dir_name;
+
+			$makeini = <<<MAKEINI
+[global]
+ignore_file = "README.md, Makefile.ini, Makefile, configure";
+ignore_dir = ".git";
+
+[target#0]
+target = "$target_dir";  
+target_param = "644"  
+target_user = "swan";
+target_group = "swan";
+target_dir_param = "755"
+target_dir_user = "swan";
+target_dir_group = "swan";
+MAKEINI;
+			file_put_contents($file_path . '/Makefile.ini', $makeini);
+		}
+	}
+
+	// }}}
+	// }}}
+}
+
+try {
+	$test = new sw_sync_wiki();
+	$test->run();
+} catch (Exception $e) {
+	echo $e->getMessage() . "\n";	
+}
