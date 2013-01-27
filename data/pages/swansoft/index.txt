@@ -1,0 +1,9 @@
+====== SwanSoft 产品 Wiki =====
+
+==== 产品介绍 ====
+
+SwanSoft 是 SwanTeam 主线开发的运维平台，目前版本是 0.12.xx 。
+
+==== 产品数据库 ====
+
+  * [[swansoft:db:mysql_desc|MYSQL 数据库结构]]

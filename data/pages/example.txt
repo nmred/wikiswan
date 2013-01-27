@@ -1,0 +1,1477 @@
+====== 已发布的版本 ======
+[[tags|各个已发布版的系统配置说明]]
+
+====== 概述 ======
+从 v8.1.0 版开始，不再区分 local 和 global 的配置，所有的系统配置不再存放到 db 中，都在 eyou_mail.ini 中进行配置。
+
+当修改了 eyou_mail.ini 之后，必须执行如下命令生成本机的系统配置 cache 才成生效：
+<code bash>
+/usr/local/eyou/mail/app/sbin/em_dynamic_config config
+# 或者
+/usr/local/eyou/mail/app/sbin/em_dynamic_config all
+</code>
+
+====== 必须配置的系统配置 ======
+无论单击还是多机都必须进行的配置
+  * [[#rtmp_XXX]]
+  * [[#server_me]]
+  * [[#server_url]]
+  * [[#self_name]]
+  * [[#service_ip_pop]]
+  * [[#login_forward_host_allow]]
+  * [[#display_spam_folder]]
+
+多机部署额外的必须配置
+  * [[#db_XXX]]
+  * [[#memcache_XXX]]
+  * [[#filed_XXX]]
+  * [[#search_XXX]]
+
+====== node_XXX ======
+===== node_id =====
+^ 类型 | String |
+^ 默认 | 1 |
+^ 说明 | 本机的节点 id，必须在整个集群中是唯一的正整数。 |
+
+===== node_center_id =====
+^ 类型 | String |
+^ 默认 | 1 |
+^ 说明 | 远程控制中心的节点 id。规则和 node_id 参数一致。 |
+
+===== node_name =====
+^ 类型 | String |
+^ 默认 | eyoumail |
+^ 说明 | 本机的节点 name，最大长度 32 字节，例如：web1、db2 等。 |
+
+===== node_server =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1 |
+^ 说明 | **此配置属于#规则** \\ 整个集群的服务器节点的 ip 地址列表。 \\ 例如：<code ini>
+;节点 id 是 1 的服务器 ip 地址是 172.16.100.1 则
+node_server#1 = "172.16.100.1"
+
+;节点 id 是 2 的服务器 ip 地址是 172.16.100.2 则
+node_server#2 = "172.16.100.2"
+</code> |
+
+===== node_module_XXX =====
+  * node_module_smtp
+  * node_module_webmail_api
+  * node_module_pushmail
+  * node_module_pop
+  * node_module_pop_acct
+  * node_module_time_mail_deliver
+  * node_module_notebook_remind
+  * node_module_member_iteration
+  * node_module_statistics
+  * node_module_search
+  * node_module_filed
+  * node_module_webmail_api_proxy
+  * node_module_pushmail_proxy
+  * node_module_db
+  * node_module_mdb
+  * node_module_memcache_session
+  * node_module_memcache_fix
+  * node_module_memcache_hot
+  * node_module_gearman_mta
+  * node_module_gearman_php
+
+^ 类型 | String |
+^ 默认 | 127.0.0.1 |
+^ 说明 | **此配置属于#规则** \\ 模块所在的服务器节点地址。 \\ 例如：<code ini>
+;模块在节点 id 是 1 的服务器上，其 ip 地址是 172.16.100.1 则
+node_module_XXX#1 = "172.16.100.1"
+</code> |
+
+===== node_rcd_port =====
+^ 类型 | String |
+^ 默认 | 3000 |
+^ 说明 | **此配置属于#规则** \\ 节点服务器的 rcd 端口号。 \\ 例如：<code ini>
+;模块在节点 id 是 1 的服务器上的 rcd 的端口号是 3000，则
+node_rcd_port#1 = 3000
+</code> |
+
+===== node_umi =====
+^ 类型 | String |
+^ 默认 | 1 |
+^ 说明 | user mail index 的节点个数 |
+
+====== db_XXX ======
+===== db_type =====
+^ 类型 | String |
+^ 默认 | mysql |
+^ 说明 | 使用的数据库类型。此配置决定了 db lib 连接哪种类型的数据库，以及系统中针对此种数据库的特殊处理。 |
+
+===== db_num =====
+^ 类型 | String |
+^ 默认 | 1 |
+^ 说明 | 数据库服务器的个数，也就是数据库实例的个数，用于多个服务器互为主从复制的自增长 id 相容处理。 |
+
+===== db_name =====
+^ 类型 | String |
+^ 默认 | eyou_mail |
+^ 说明 | 数据库的库名。|
+
+===== db_mysql_host =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1 |
+^ 说明 | MySQL 服务器地址。如果服务器地址为 Internet 套接字则使用此配置，如果为 Unix 域套接字则使用 db_mysql_sock 配置 。 如果 db_mysql_sock 参数不为空，则应该优先使用 db_mysql_sock 参数，同时忽略此参数。 |
+
+===== db_mysql_port =====
+^ 类型 | String |
+^ 默认 | 3306 |
+^ 说明 | MySQL 服务器端口。只针对服务器地址为 Internet 套接字的情况下使用。 |
+
+===== db_mysql_user =====
+^ 类型 | String |
+^ 默认 | eyou |
+^ 说明 | MySQL 服务器用户名。 |
+
+===== db_mysql_pass =====
+^ 类型 | String |
+^ 默认 | 空字符串 |
+^ 说明 | MySQL 服务器密码。 |
+
+===== db_mysql_sock =====
+^ 类型 | String |
+^ 默认 | 空字符串 |
+^ 说明 | MySQL 服务器的 Socket 文件绝对路径。只针对服务器地址为 Unix 域套接字的情况下使用。此参数的优先级及比 db_mysql_host 的优先级要高，也就是说，如果此参数不为空，则应该优先使用此参数，同时忽略 db_mysql_host 参数。 |
+
+====== dbumi_XXX ======
+===== dbumi_type =====
+^ 类型 | String |
+^ 默认 | mysql |
+^ 说明 | user mail index 库使用的数据库类型。 |
+
+===== dbumi_mysql_user =====
+^ 类型 | String |
+^ 默认 | eyou |
+^ 说明 | user mail index 库的 MySQL 服务器用户名。 |
+
+===== dbumi_mysql_pass =====
+^ 类型 | String |
+^ 默认 | 空字符串 |
+^ 说明 | user mail index 库的 MySQL 服务器密码。 |
+
+===== dbumi_mysql_dsn =====
+^ 类型 | String |
+^ 默认 | <nowiki>unix_socket=/usr/local/eyou/mail/run/em_mysql_index.sock;dbname=eyou_mail_index</nowiki> |
+^ 说明 | **此配置属于 # 规则。** \\ \\ 参数说明：<code ini>
+host: 服务器名或者 ip 地址
+port: 端口号
+dbname: 数据库名
+unix_socket: UNIX 域套接字地址, 如果指定了此参数则会忽略 host 和 port
+
+; host/port 连接配置：
+  dbumi_mysql_dsn = "host=127.0.0.1;port=3306;dbname=eyou_mail"
+; unix_socket 连接配置：
+  dbumi_mysql_dsn = "unix_socket=/usr/local/eyou/mail/opt/logs/mysql.sock;dbname=eyou_mail"
+</code>单服务器（或多服务器的配置相同）配置示例：<code ini>
+dbumi_mysql_dsn = "host=127.0.0.1;port=3306;dbname=eyou_mail"
+dbumi_mysql_dsn = "unix_socket=/usr/local/eyou/mail/opt/logs/mysql.sock;dbname=eyou_mail"
+</code>如果多个 user mail index 服务器的配置不同, 可以通过在配置名称后面加 #N 来区分, N必须是从 0 开始并且是连续的正整数, 例如：<code ini>
+dbumi_mysql_dsn#0 = "host=127.0.0.1;port=3306;dbname=eyou_mail_index_0"
+dbumi_mysql_dsn#1 = "host=127.0.0.1;port=3306;dbname=eyou_mail_index_1"
+</code> |
+====== dblog_XXX ======
+===== dblog_type =====
+^ 类型 | String |
+^ 默认 | mysql |
+^ 说明 | 使用的 log 数据库类型。此配置决定了 db lib 连接哪种类型的数据库，以及系统中针对此种数据库的特殊处理。 |
+
+===== dblog_name =====
+^ 类型 | String |
+^ 默认 | eyou_mail_log |
+^ 说明 | log 数据库的库名。|
+
+===== dblog_mysql_host =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1 |
+^ 说明 | MySQL log 服务器地址。如果服务器地址为 Internet 套接字则使用此配置，如果为 Unix 域套接字则使用 dblog_mysql_sock 配置 。 如果 dblog_mysql_sock 参数不为空，则应该优先使用 dblog_mysql_sock 参数，同时忽略此参数。 |
+
+===== dblog_mysql_port =====
+^ 类型 | String |
+^ 默认 | 3326 |
+^ 说明 | MySQL log 服务器端口。只针对服务器地址为 Internet 套接字的情况下使用。 |
+
+===== dblog_mysql_user =====
+^ 类型 | String |
+^ 默认 | eyou |
+^ 说明 | MySQL log 服务器用户名。 |
+
+===== dblog_mysql_pass =====
+^ 类型 | String |
+^ 默认 | 空字符串 |
+^ 说明 | MySQL log 服务器密码。 |
+
+===== dblog_mysql_sock =====
+^ 类型 | String |
+^ 默认 | 空字符串 |
+^ 说明 | MySQL log 服务器的 Socket 文件绝对路径。只针对服务器地址为 Unix 域套接字的情况下使用。此参数的优先级及比 dblog_mysql_host 的优先级要高，也就是说，如果此参数不为空，则应该优先使用此参数，同时忽略 dblog_mysql_host 参数。 |
+
+====== memcache_XXX ======
+memcache 参数配置。
+
+**配置规则：**
+
+每个服务器的地址和端口号冒号 (:) 分隔, 格式为 host:port:weight, 多个服务器之间用英文逗号 (,) 分隔
+  * host: Memcache 服务器的地址
+  * port: Memcache 服务器的端口
+  * weight: Memcache 服务器的权重, 此参数可以忽略
+
+例如:
+  * 192.168.0.1:11211
+  * 192.168.0.1:11211,192.168.0.2:11211
+  * 192.168.0.1:11211:20,192.168.0.2:11211:80
+
+===== memcache_session =====
+^ 类型 | String |
+^ 默认 | 空串 |
+^ 说明 | session 使用的 Memcache 服务器配置，端口号尽量以 11211 开始。 |
+
+===== memcache_fix =====
+^ 类型 | String |
+^ 默认 | 空串 |
+^ 说明 | fix 使用的 Memcache 服务器配置，端口号尽量以 11231 开始。 |
+
+===== memcache_hot =====
+^ 类型 | String |
+^ 默认 | 空串 |
+^ 说明 | hot 使用的 Memcache 服务器配置，端口号尽量以 11251 开始。 |
+
+====== lock_XXX ======
+===== lock_type =====
+^ 类型 | String |
+^ 默认 | file |
+^ 说明 | 当前使用的 Lock 服务的类型。<code>
+file: 简单的文件锁服务，由 PHP 自己实现
+emls: eYou LockServer 分布式网络锁服务
+</code> |
+
+===== lock_emls_server =====
+^ 类型 | String |
+^ 默认 | 空串 |
+^ 说明 | 要连接的 eYou LockServer 分布式网络锁服务的配置。支持配置多个服务器，以支持分布，多个服务器用分号分隔。 \\ 格式如下：<code bash>
+host_1,port_1;host_2,port_2,...
+
+# 例如：
+192.168.0.1,12345;192.168.0.2,12346
+</code> |
+
+====== rtmp_XXX ======
+===== rtmp_host =====
+^ 类型 | String |
+^ 默认 | 空串 |
+^ 说明 | rtmp 服务器的地址，必须是用户浏览器能访问到的域名或者 IP 地址。 |
+
+===== rtmp_port =====
+^ 类型 | String |
+^ 默认 | 1935 |
+^ 说明 | rtmp 服务器的端口 |
+
+====== error_XXX ======
+错误处理参数配置。
+
+===== error_output_mode =====
+^ 类型 | 常量 |
+^ 默认 | EYOUM_EO_SYSLOG |
+^ 说明 | 错误处理的输出方式，具体参见邮件系统的 EYOUM_EO_XXX 系列常量。 |
+
+====== syslog_XXX ======
+syslog 参数配置。
+
+===== syslog_option =====
+^ 类型 | 常量 |
+^ 默认 | <nowiki>LOG_NDELAY | LOG_PID</nowiki> |
+^ 说明 | syslog 记录。具体参见系统函数 openlog() 的第 2 个参数。 |
+
+===== syslog_facility =====
+^ 类型 | 常量 |
+^ 默认 | LOG_MAIL |
+^ 说明 | syslog 设施类型，具体参见系统函数 openlog() 的第 3 个参数。 |
+
+===== syslog_priority =====
+^ 类型 | 常量 |
+^ 默认 | LOG_WARNING |
+^ 说明 | syslog 优先级，具体参见系统函数 syslog() 的第 1 个参数。 |
+
+====== server_XXX ======
+服务器域名ip等设置。
+
+===== server_me =====
+^ 类型 | String |
+^ 默认 | test.eyou.net |
+^ 说明 | 邮件系统主域名，也就是默认域。也用于绑定 license。|
+
+===== server_name =====
+^ 类型 | String |
+^ 默认 | localhost |
+^ 说明 | 主机名或者 IP 地址。此参数主要用于分布式的部署。例如：<code>
+|
+|-- cnc.eyou.net (网通机房)
+|    |-- 192.168.1.1 (server_name 为 cnc.eyou.net)
+|    |-- 192.168.1.2 (server_name 为 cnc.eyou.net)
+|
+|-- ct.eyou.net (电信机房)
+|    |-- 192.168.2.1 (server_name 为 ct.eyou.net)
+|    |-- 192.168.2.2 (server_name 为 ct.eyou.net)
+</code> |
+
+===== server_url =====
+^ 类型 | String |
+^ 默认 | localhost |
+^ 说明 | 指向此邮件系统的的域名或者 ip 地址。此参数用于需要拼装指向此服务器的 URL 之用，例如邮件列表审批信中的审批链接。 |
+
+====== self_xxx ======
+在多服务器部署的情况下，每个服务器各自单独的类似 server_xxx 的配置。
+
+===== self_name =====
+^ 类型 | String |
+^ 默认 | localhost |
+^ 说明 | 主机名。用于区分物理服务器的主机名。无论如何部署，同一个邮件系统下的不同的物理服务器的此参数必须不同。 |
+
+====== debug ======
+^ 类型 | String |
+^ 默认 | 6 |
+^ 说明 | debug 级别，详见 [[..:..:程序运行日志记录方法]] |
+
+====== debug_writer ======
+^ 类型 | String |
+^ 默认 | s |
+^ 说明 | debug 日志的写入途径。s: 通过 em_syslog 写入；f: 通过程序直接都写文件写入 |
+
+====== stress_testing_level ======
+^ 类型 | String |
+^ 默认 | 0 |
+^ 说明 | 压力测试的模式级别，级别越高，优化程度越高。 \\ \\ **由于此功能涉及商业机密，具体细节不在这里给出，具体参见 [[..:..:压力测试说明]]** \\ \\ 级别分类：<code>0: 关闭压力测试模式
+1: 第一级别
+2: 第二级别</code>|
+
+====== stress_testing_user ======
+^ 类型 | Array|
+^ 默认 | <nowiki>{"rcpt_num":"1000","rcpt_size":"100"}</nowiki> |
+^ 说明 | 压力测试的用户属性默认值。结构如下：<code php>
+Array (
+    'rcpt_num'  => '1000', // 一封信的收件人的个数
+    'rcpt_size' => '100',  // 一封信的最大大小，单位 MB
+)
+</code> |
+
+====== service_ip_xxx ======
+各种服务的服务器 IP 地址列表。
+
+===== service_ip_smtp =====
+^ 类型 | Array |
+^ 默认 | <nowiki>["127.0.0.1"]</nowiki> |
+^ 说明 | smtp 服务的服务器 IP 地址列表，主要用于监控和验证。 |
+
+===== service_ip_pop =====
+^ 类型 | Array |
+^ 默认 | <nowiki>["127.0.0.1"]</nowiki> |
+^ 说明 | pop 服务的服务器 IP 地址列表，主要用于监控和验证。 |
+
+===== service_ip_web =====
+^ 类型 | Array |
+^ 默认 | <nowiki>["127.0.0.1"]</nowiki> |
+^ 说明 | web 服务的服务器 IP 地址列表，主要用于监控和验证。 |
+
+===== service_ip_api =====
+^ 类型 | Array |
+^ 默认 | <nowiki>["127.0.0.1"]</nowiki> |
+^ 说明 | api 服务的服务器 IP 地址列表，主要用于监控和验证。 |
+
+====== filed_XXX ======
+===== filed_host =====
+^ 类型 | String |
+^ 默认 | localhost |
+^ 说明 | Filed 服务器地址。如果服务器地址为 Internet 套接字则使用此配置，如果为 Unix 域套接字则使用 filed_sock 配置 。 如果 filed_sock 参数不为空，则应该优先使用 filed_sock 参数，同时忽略此参数。 |
+
+===== filed_port =====
+^ 类型 | String |
+^ 默认 | 10001 |
+^ 说明 | Filed 服务器端口。只针对服务器地址为 Internet 套接字的情况下使用。 |
+
+===== filed_sock =====
+^ 类型 | String |
+^ 默认 | 空串 |
+^ 说明 | Filed 服务器的 Socket 文件绝对路径。只针对服务器地址为 Unix 域套接字的情况下使用。此参数的优先级及比 filed_host 的优先级要高，也就是说，如果此参数不为空，则应该优先使用此参数，同时忽略 filed_host 参数。 |
+
+====== search_XXX ======
+===== search_host =====
+^ 类型 | String |
+^ 默认 | localhost |
+^ 说明 | search 服务器地址。 |
+
+===== search_port =====
+^ 类型 | String |
+^ 默认 | 8181 |
+^ 说明 | search 服务器端口。 |
+
+====== hash_level_XXX ======
+目录哈希级别配置。
+
+===== hash_level_tmp =====
+^ 类型 | String |
+^ 默认 | 2 |
+^ 说明 | 临时目录 Hash 级别。数值是多少，就意味着是多少层 Hash 目录。 |
+
+====== password_encode_XXX ======
+密码编码配置参数。
+
+===== password_encode_algo =====
+^ 类型 | String |
+^ 默认 | h-md5-b |
+^ 说明 | 密码的编码算法 |
+
+===== password_encode_em_key =====
+^ 类型 | String |
+^ 默认 | 75eb19a64d69265e05af60d2a434e2314c43c516d8835185e8bdc59dbeff1667 |
+^ 说明 | 密码使用 hash_em 算法哈希需要的附加 key。此配置的值为真正的 key 的 16 进制表示。默认值计算方法为 md5('eYou_crypt_key') . md5('Mail 4 + 5 = BEST!')。 |
+
+===== password_encode_crypt_key =====
+^ 类型 | String |
+^ 默认 | 75eb19a64d69265e05af60d2a434e2314c43c516d8835185e8bdc59dbeff1667 |
+^ 说明 | 密码使用 crypt 可逆算法加密需要的私钥。此配置的值为真正的 key 的 16 进制表示。默认值计算方法为 md5('eYou_crypt_key') . md5('Mail 4 + 5 = BEST!')。 |
+
+===== password_encode_crypt_mode =====
+^ 类型 | String |
+^ 默认 | ecb |
+^ 说明 | <nowiki>密码使用 crypt 可逆算法的加密模式。可以是 ecb | cbc | cfb | ofb 中的一种，一般情况下最好使用 ecb。</nowiki> |
+
+===== password_encode_crypt_iv =====
+^ 类型 | String |
+^ 默认 | 05c8779d7e529627fe2219699a744c90 |
+^ 说明 | 密码使用 crypt 可逆算法加密需要的 iv（初始化向量）。此配置的值为真正的 iv 的16进制表示。默认值计算方法为 md5('eYou_crypt_iv')。 |
+
+====== timezone ======
+^ 类型 | String |
+^ 默认 | Asia/Chongqing  |
+^ 说明 | 系统时区设置。 |
+
+====== session_lifetime ======
+^ 类型 | String |
+^ 默认 | 7200 |
+^ 说明 | session 的生存时间，也就是 session 在多久之后过期。单位：秒。 |
+
+====== country ======
+^ 类型 | String |
+^ 默认 | CN |
+^ 说明 | 系统的国家设置。此配置目前用在获取 ip 归属地中的本国概念中，此配置国家之外的国家称为外国（境外）。此配置必须符合 [[http://www.iso.org/iso/country_names_and_code_elements|ISO 3166-1]] |
+
+====== ip_area ======
+^ 类型 | Array |
+^ 默认 | <nowiki>{"in_co":"0","in_pr":"1","in_ci":"1","out_co":"1","out_pr":"0","out_ci":"0","out_fix":"","sp":","}</nowiki> |
+^ 说明 | ip 归属地显示方式配置。格式如下（说明中的国内和国外是相对系统配置 country 而言的，默认 CN 中国是国内。）：<code javascript>
+{
+    "in_co" : "0", // 国内 ip 是否显示国家
+    "in_pr" : "1", // 国内 ip 是否显示省
+    "in_ci" : "1", // 国内 ip 是否显示市
+    "out_co" : "1", // 国外 ip 是否显示国家
+    "out_pr" : "0", // 国外 ip 是否显示省，由于默认的 ip 库中没有国外的省数据，所以此配置默认看不到效果
+    "out_ci" : "0", // 国外 ip 是否显示市，由于默认的 ip 库中没有国外的市数据，所以此配置默认看不到效果
+    "out_fix" : "国外", // 国外 ip 是否所有的都固定显示成此值，此配置应该是 gettext 的 msgid。例如全部显示成"国外"，配置成空就是采用 out_xxx 的配置
+    "sp": "," // 国家、省、市 的显示分隔符，例如配置成", " 则显示成：中国, 河北, 石家庄
+}
+</code> |
+
+====== lang ======
+^ 类型 | String |
+^ 默认 | zh_CN |
+^ 说明 | 系统的语言设置，这个设置会影响所有涉及系统语言的地方。 |
+
+====== lang_list ======
+^ 类型 | Array |
+^ 默认 | 仅简体中文：<code>{"zh_CN":{"default":"GBK","list":["GBK","GB18030"]}}</code> \\ 简体中文和英文：<code>{"en_US":{"default":"ISO-8859-1","list":["ISO-8859-1"]},"zh_CN":{"default":"GBK","list":["GBK","GB18030"]}}</code> \\ 简体中文、繁体中文和英文：<code>{"en_US":{"default":"ISO-8859-1","list":["ISO-8859-1"]},"zh_CN":{"default":"GBK","list":["GBK","GB18030"]},"zh_TW":{"default":"BIG5","list":["BIG5","EUC-TW"]}}</code> |
+^ 说明 | 系统支持的语言信息列表。 |
+
+====== member_property_cache_type ======
+^ 类型 | String |
+^ 默认 | 不包含换行和空白行，这里显示换行和空白行是为了方便阅读。<code>domain_key,
+domain_basic,
+domain_config,
+domain_custom,
+domain_filter,
+
+group_basic,
+group_config,
+group_custom,
+group_display,
+group_send_black_list,
+group_send_white_list,
+group_subscribe_black_list,
+group_subscribe_white_list,
+
+user_key,
+user_basic,
+user_acl,
+user_auto_reply_black_list,
+user_auto_reply_white_list,
+user_black_list,
+user_white_list
+user_custom,
+user_filter,
+user_filter_forwarding,
+user_forwarding,
+user_signature,
+user_pop_acct,
+user_personal,
+user_config,
+user_contacts,
+user_avatar,
+user_letterpaper,
+user_letterpaper_content
+</code> |
+^ 说明 | 系统需要缓存的成员属性信息类型。每种属性信息类型使用英文逗号 (,) 分隔。 |
+
+====== innerapi_user ======
+^ 类型 | Array |
+^ 默认 | <nowiki>{"eyou":{"key":"c751c935952f5beb803a509b6422fbba"}}</nowiki> |
+^ 说明 | 内部 api 的账户信息。格式为：<code php>
+array(
+    [user_name] =>
+    array(
+        'key' => [private_key],
+    )
+    // ...
+)
+</code> |
+
+====== group_examine_queue_timeout ======
+^ 类型 | Array |
+^ 默认 | <nowiki>{"send":72,"subscribe":72}</nowiki> |
+^ 说明 | 组/邮件列表 发送和订阅队列的超时时间，超过超时时间的记录将会被系统拒绝。格式为：<code php>
+array(
+    'send'      => 72, // 单位: 小时
+    'subscribe' => 72, // 单位: 小时
+)
+</code> |
+
+====== group_examine_header_private_key ======
+^ 类型 | String |
+^ 默认 | 4a4c08e12d844ef946f3c19e2599ac7f |
+^ 说明 | 用于计算组邮件审批邮件头的私钥。此邮件头用于标记此邮件是否需要继续进行审批。 |
+
+====== restrict_xxx ======
+一些约束参数。
+
+===== restrict_acct_name_len_min =====
+^ 类型 | String |
+^ 默认 | 2 |
+^ 说明 | 账户名的最小长度 |
+
+===== restrict_acct_name_len_max =====
+^ 类型 | String |
+^ 默认 | 64 |
+^ 说明 | 账户名的最大长度 |
+
+===== restrict_domain_name_len_min =====
+^ 类型 | String |
+^ 默认 | 3 |
+^ 说明 | 域名的最小长度 |
+
+===== restrict_domain_name_len_max =====
+^ 类型 | String |
+^ 默认 | 160 |
+^ 说明 | 域名的最大长度 |
+
+===== restrict_user_password_len_min =====
+^ 类型 | String |
+^ 默认 | 6 |
+^ 说明 | 用户密码的最小长度 |
+
+===== restrict_user_password_len_max =====
+^ 类型 | String |
+^ 默认 | 32 |
+^ 说明 | 用户密码的最大长度 |
+
+===== restrict_user_quota_max =====
+^ 类型 | String |
+^ 默认 | 4096 |
+^ 说明 | 用户空间的最大值。单位 MB |
+
+===== restrict_user_attach_size_max =====
+^ 类型 | String |
+^ 默认 | 100 |
+^ 说明 | 用户附件大小的最大值。单位 MB |
+
+===== restrict_user_rcpt_num_max =====
+^ 类型 | String |
+^ 默认 | 1000 |
+^ 说明 | 用户单封邮件最大的收件人个数的最大值。 |
+
+===== restrict_user_rcpt_size_max =====
+^ 类型 | String |
+^ 默认 | 100 |
+^ 说明 | 用户单封邮件最大大小的最大值。单位 MB |
+
+===== restrict_user_upload_size_max =====
+^ 类型 | String |
+^ 默认 | 1024 |
+^ 说明 | 用户上传文件大小的最大值，主要用于上传格式文件。单位 KB |
+
+===== restrict_folder_name_len_min =====
+^ 类型 | String |
+^ 默认 | 3 |
+^ 说明 | 文件夹名称的最小值。 |
+
+===== restrict_folder_name_len_max =====
+^ 类型 | String |
+^ 默认 | 30 |
+^ 说明 | 文件夹名称的最大值。 |
+
+====== register_user_domain_set ======
+^ 类型 | String |
+^ 默认 | 0 |
+^ 说明 | 用户自注册的域设置。<code>0 所有域都不允许进行用户自注册，无论 register_user_domain_list 如何设置；
+1 显示所有允许的域列表，具体允许的域由 register_user_domain_list 设置；
+2 通过访问的 URL 来提取域名：获取访问登录页面的 URL 中的域名（例如 http://mail.eyou.net 应尝试匹配 mail.eyou.net 和 eyou.net ），
+  如果提取到的域名在允许的域列表中，则显示此域名，否则显示所有允许的域列表 。</code> |
+
+====== register_user_domain_list ======
+^ 类型 | Array |
+^ 默认 | <nowiki>[]</nowiki> |
+^ 说明 | 允许进行用户自注册的域列表。如果系统内所有的域都允许，则值为关联数组，格式为：<code php>
+array(
+    '_set' => 1,
+)
+</code>如果单独制定允许的域，则值为索引数组，格式为：<code php>
+array(
+    'testa.com',
+    'testb.com',
+    // ...
+)
+</code> |
+
+====== auth_register_user_domain_set ======
+^ 类型 | String |
+^ 默认 | 0 |
+^ 说明 | 用户认证注册的域设置。<code>0 所有域都不允许进行用户认证注册，无论 auth_register_user_domain_list 如何设置；
+1 显示所有允许的域列表，具体允许的域由 auth_register_user_domain_list 设置；
+2 通过访问的 URL 来提取域名：获取访问登录页面的 URL 中的域名（例如 http://mail.eyou.net 应尝试匹配 mail.eyou.net 和 eyou.net ），
+  如果提取到的域名在允许的域列表中，则显示此域名，否则显示所有允许的域列表 。
+3 如果采用自定义 implements 实现方法，则采用 imptype_authreg 所定义的方法来实现</code> |
+
+====== auth_register_user_domain_list ======
+^ 类型 | Array |
+^ 默认 | <nowiki>[]</nowiki> |
+^ 说明 | 允许进行用户认证注册的域列表。如果系统内所有的域都允许，则值为关联数组，格式为：<code php>
+array(
+    '_set' => 1,
+)
+</code>如果单独指定允许的域，则值为索引数组，格式为：<code php>array(
+    'testa.com',
+    'testb.com',
+    // ...
+)
+</code> |
+
+====== login_display_domain_set ======
+^ 类型 | String |
+^ 默认 | 1 |
+^ 说明 | 登录界面域名列表显示方式。<code>0 不显示域名列表：将不显示域名列表下拉菜单
+
+1 显示全部的域列表：将显示本系统中存在的所有域名列表
+
+2 显示指定的域列表：显示 login_display_domain_list 配置中设置的域名列表，如果配置为空，则不显示域名列表
+
+3 通过访问的 URL 来提取域名：获取访问登录页面的 URL 中的域名（例如 http://mail.eyou.net 应尝试匹配 mail.eyou.net 和 eyou.net ），
+如果此域名在系统中存在，则显示此域名，否则显示 login_display_domain_list 配置中的域名列表，如果配置为空，则不显示域名列表</code> |
+
+====== login_display_domain_list ======
+^ 类型 | Array |
+^ 默认 | <nowiki>[]</nowiki> |
+^ 说明 | 登录界面需要指定显示的域名列表。格式为：<code php>
+array(
+    'testa.com',
+    'testb.com',
+    // ...
+)
+</code> |
+
+====== password_safe_question ======
+^ 类型 | String |
+^ 默认 | 0 |
+^ 说明 | 密码安全提示问题的设置。用户自注册，邮箱设置中的密码安全等都统一使用此设置。<code php>
+0 允许用户自定义密码提示问题
+1 使用预先设置好的列表来制定，此配置写在 gettext 中，id 为 password_safe_question_list。
+</code> |
+
+====== password_attempts_lock_ip ======
+^ 类型 | Array |
+^ 默认 | <nowiki>{"lock":"0","attempts_duration":"5","lock_duration":"10"}</nowiki> |
+^ 说明 | 用户登录密码尝试锁定 IP 设置。格式为：<code php>
+array(
+    'lock'              => '0',  // 尝试多少次之后锁定 IP。0 为不做限制。
+    'attempts_duration' => '5',  // 持续计算的时间。单位：分钟。
+    'lock_duration'     => '10', // 锁定的时间。单位：分钟。
+)
+</code> |
+
+====== password_attempts_unrestricted_ip ======
+^ 类型 | Array |
+^ 默认 | <nowiki>["127.0.0.0/8"]</nowiki> |
+^ 说明 | 用户登录密码尝试锁定的**不受限制**的 IP 设置。 \\ 格式为 ip/mask 形式，例如：<code php>
+array(
+    '127.0.0.0/8',
+    '172.16.100.0/24',
+)
+</code> |
+
+====== login_ssl ======
+^ 类型 | String |
+^ 默认 | 0 |
+^ 说明 | 登录界面的 SSL 安全登录的方式。<code php>
+0 关闭 SSL 安全登录功能
+1 让用户在登录页面自己选择是否进行 SSL 安全登录
+2 强制使用 SSL 安全登录
+3 强制使用 SSL安全登录，并在登录之后也强制进行 SSL 请求。
+
+注意：此参数是通过控制登录界面的请求 URL 是否使用 https 协议，并没有在 Apache 端实现真正的强制，安全性有待提升。
+</code> |
+
+====== login_forward_host_allow ======
+^ 类型 | Array |
+^ 默认 | <nowiki>["*"]</nowiki> |
+^ 说明 | 登录结果跳转页面的 url 中 host 的强制限制。此限制主要用于防止钓鱼攻击。 \\ 格式如下：<code php>
+Array (
+    "*.test.com",     // * 代表 0 或者多个域名允许的字符串
+    "cnc?.test.com",  // ? 代表任何一个域名允许的字符串
+)
+</code> |
+
+====== logout_user_location ======
+^ 类型 | Array |
+^ 默认 | <nowiki>{"target":"","furl":"1","url":""}</nowiki> |
+^ 说明 | User Web 退出定向的 URL 及配置。 \\ 格式如下：<code php>
+Array (
+    'target' => "top",  // 定向到的目标 target。可以为 parent, top 或空。如果不是 parent 或 top 则全部当作是当前的 target。
+    'furl'   => "1",    // 是否向定向目标 URL 附加 furl。1: 附加 | 0: 不附加
+    'url'    => "http://mail.eyou.net/?aaa=bbb", // 定向到的目标 URL。如果为空则使用默认的当前 host。
+)
+</code> |
+
+====== browser_title ======
+^ 类型 | Array |
+^ 默认 | <nowiki>{"web_user":"eYou 邮件系统","web_admin":"eYou 邮件系统"}</nowiki> |
+^ 说明 | 浏览器中显示的页面 Title。 \\ 格式如下：<code php>
+Array (
+    'web_user'  => 'eYou 邮件系统', // User Web 的页面 Title
+    'web_admin' => 'eYou 邮件系统', // Admin Web 的页面 Title
+)
+</code> |
+
+====== browser_copyright ======
+^ 类型 | Array |
+^ 默认 | <nowiki>{"web_user":"eYouMail 5<br>&copy;2009-2013 eYou.net","web_admin":"eYouMail 5<br>&copy;2009-2013 eYou.net"}</nowiki> |
+^ 说明 | 浏览器中显示的页面 Copyright。 \\ 格式如下：<code php>
+Array (
+    'web_user'  => 'eYouMail 5<br>&copy;2009-2010 eYou.net', // User Web 的页面 Copyright
+    'web_admin' => 'eYouMail 5<br>&copy;2009-2010 eYou.net', // Admin Web 的页面 Copyright
+)
+</code> |
+
+====== block_upload ======
+^ 类型 | Array |
+^ 默认 | <nowiki>{"size_min":10240,"num_max":20}</nowiki> |
+^ 说明 | 分块上传的配置。 \\ 格式如下：<code php>
+Array (
+    'size_min' => 10240, // 每块的最小大小，如果附件总大小小于此值则不进行分块。单位：字节。硬限制：最小不能小于 10240 字节，也就是 10K。
+    'num_max'  => 20, // 最多分几块。调整成 0 或者 1 则不进行分块。硬限制：最大不能超过 50 块。
+)
+</code> |
+
+====== activesync_title ======
+^ 类型 | String |
+^ 默认 | eYouMail-ActiveSync |
+^ 说明 | 在 ActiveSync Pushmail 中显示的标题。 |
+
+====== nginx_upload_url ======
+^ 类型 | String |
+^ 默认 | <nowiki>http://127.0.0.1/upload_progress</nowiki> |
+^ 说明 | 查询 nginx 文件上传进度的 url。 |
+
+====== captcha_display ======
+^ 类型 | Array |
+^ 默认 | **没有换行** <nowiki>{"user_login":{"enabled":1,"times":3,"char":"n"},
+"admin_login":{"enabled":1,"times":3,"char":"nlu"},
+"reset_password":{"enabled":1,"char":"nlu"},
+"user_register":{"enabled":1,"char":"nlu"},
+"user_authreg":{"enabled":1,"char":"nlu"}}</nowiki> |
+^ 说明 | 验证码设置。格式为：<code php>
+array(
+    'user_login' =>
+    array(
+        'enabled' => 1,     // 是否启用。启用: 1 | 不启用: 0 | 登录 times 次之后再出现: 2
+        'times'   => 3,     // 重试几次之后才出现验证码。只有在 enabled 为 2 的时候才有效。
+        'char'    => 'nlu', // 验证码的字符范围。数字: n | 小写字母: l | 大写字母: u
+    ),
+    'admin_login' =>
+    array(
+        'enabled' => 1,     // 是否启用。启用: 1 | 不启用: 0 | 登录 times 次之后再出现: 2
+        'times'   => 3,     // 重试几次之后才出现验证码。只有在 enabled 为 2 的时候才有效。
+        'char'    => 'nlu', // 验证码的字符范围。数字: n | 小写字母: l | 大写字母: u
+    ),
+    'reset_password' =>
+    array(
+        'enabled' => 1,     // 是否启用。启用: 1 | 不启用: 0
+        'char'    => 'nlu', // 验证码的字符范围。数字: n | 小写字母: l | 大写字母: u
+    ),
+    'user_register' =>
+    array(
+        'enabled' => 1,     // 是否启用。启用: 1 | 不启用: 0
+        'char'    => 'nlu', // 验证码的字符范围。数字: n | 小写字母: l | 大写字母: u
+    ),
+    'user_authreg' =>
+    array(
+        'enabled' => 1,     // 是否启用。启用: 1 | 不启用: 0
+        'char'    => 'nlu', // 验证码的字符范围。数字: n | 小写字母: l | 大写字母: u
+    ),
+)
+</code> |
+====== unrestricted_ip_admin ======
+^ 类型 | Array |
+^ 默认 | <nowiki>[]</nowiki> |
+^ 说明 | 不受管理端 IP 访问限制的 IP 地址列表，此配置主要用于操作错误造成无法访问管理端。格式为：<code php>
+array(
+    '192.168.1.1', 
+    '192.168.1.2',
+    // ...
+)
+</code> |
+
+====== eyousync_ip_allow ======
+^ 类型 | Array |
+^ 默认 | <nowiki>[]</nowiki> |
+^ 说明 | 允许访问 eyousync 的 ip 地址列表。格式为：<code php>
+array(
+    '192.168.1.1', 
+    '192.168.1.2',
+    // ...
+)
+</code> |
+
+====== eyouinnerdriver_ip_allow ======
+^ 类型 | Array |
+^ 默认 | <nowiki>[]</nowiki> |
+^ 说明 | 允许访问 eyouinnerdriver 的 ip 地址列表。格式为：<code php>
+array(
+    '192.168.1.1', 
+    '192.168.1.2',
+    // ...
+)
+</code> |
+
+====== ignore_duplicate_mail ======
+^ 类型 | String |
+^ 默认 | 0 |
+^ 说明 | 是否在向用户邮箱投递邮件的时候忽略重复的邮件。忽略重复的邮件是通过邮件的 mail_unique 判断的。 |
+
+====== ignore_duplicate_mail_duration ======
+^ 类型 | String |
+^ 默认 | 1 |
+^ 说明 | 在向用户邮箱投递邮件的时候，会根据 ignore_duplicate_mail 判断是否需要忽略重复的邮件，而此配置决定多长时间之内的邮件用于进行此判断。单位：小时。 |
+
+====== pop_acct_check_set ======
+^ 类型 | String |
+^ 默认 | <nowiki>{"interval":30,"timeout":12,"max_num":100}</nowiki> |
+^ 说明 | 用户 pop acct 的设置。 \\ 结构为：<code php>
+Array (
+    'interval' => 30,  // 每个 pop acct 的最短收取时间间隔，必须超过此时间间隔才能发起下一次请求。单位：分钟。
+    'timeout'  => 12,  // 每个请求的超时时间，如果超过此时间还没有被处理完成则认为已经完成。单位：小时。
+    'max_num'  => 100, // 每次请求最多收取的信件，如果需要收取的信件超出此限制，则放到下次收取剩余的信件。
+)
+</code>|
+
+====== user_migrate_set ======
+^ 类型 | String |
+^ 默认 | <nowiki>{"interval":30,"auth_type":["web_user"]}</nowiki> |
+^ 说明 | 用户迁移的设置。 \\ 结构为：<code php>
+Array (
+    'interval' => 30, // 在迁移处于"等待 worker 处理"或"正在处理中"或"处理中断"状态下，再次迁移的请求的时间间隔，必须超过此时间间隔才能发起下一次请求。单位：分钟。
+    'auth_type' =>    // 在什么类型的登陆方式下进行认证时迁移
+    array(
+        'web_user',
+        'smtp',
+        'pop',
+        'imap',
+    ),
+)
+</code>|
+
+====== mobile_send_sms ======
+^ 类型 | Array |
+^ 默认 | <nowiki>{"split":0,"max_num":5,"max_per":70,"bound":0}</nowiki> |
+^ 说明 | 手机发送自写短信的系统配置。 \\ 结构为：<code php>
+Array(
+    'split'   => 0,  // 超过单条长度的短信（长短信）是否拆分发出去。0: 不拆分 | 1: 拆分。
+    'max_num' => 5,  // 长短信的最大支持的条数
+    'max_per' => 70, // 每条基本短信（非长短信）支持的最大字数，不区分单字节字符和宽字符。
+    'bound'   => 0,  // 是否需要绑定手机号码才能使用自写短信。0: 不需要 | 1: 需要。
+)
+</code> |
+
+====== admin_user_mail_manage ======
+^ 类型 | Array |
+^ 默认 | <nowiki>{"is_open":1,"allow_read":0,"time_span":48}</nowiki> |
+^ 说明 | Admin 用户邮件管理的配置。 \\ 结构为：<code php>
+Array(
+    'is_open'      => 1,  // 是否开启此功能
+    'allow_read'   => 0,  // 是否允许读取信件内容
+    'time_span'    => 48, // 最大支持的查询时间跨度。单位：小时。
+)
+</code> |
+
+====== admin_user_list_max_acct_num ======
+^ 类型 | String |
+^ 默认 | 100000 |
+^ 说明 | 当前域下的账户数如果超过此配置数量，则 Admin 现有用户操作页面默认显示空用户列表。 |
+
+====== user_pack_mail ======
+^ 类型 | Array |
+^ 默认 | <nowiki>{"size":100,"num":1000}</nowiki> |
+^ 说明 | 用户打包邮件的大小和数量的限制。 \\ 结构为：<code php>
+Array(
+    'size' => 100,   // 最大大小。单位：MB。
+    'num'  => 1000,  // 最大数量
+)
+</code> |
+
+====== display_spam_folder ======
+^ 类型 | String |
+^ 默认 | 0 |
+^ 说明 | 是否显示垃圾邮件文件夹。一般只有启用了网关打分投递到垃圾邮件文件夹功能才需要显示此文件夹。 |
+
+====== display_mark_spam ======
+^ 类型 | String |
+^ 默认 | 0 |
+^ 说明 | 是否显示"这是垃圾邮件"和"这不是垃圾邮件"的功能按钮。由于"这不是垃圾邮件"功能按钮是显示在垃圾邮件文件夹中的，所以如果 [[#display_spam_folder]] 配置成 0，那么即使此配置被配置成 1，也无法呈现"这不是垃圾邮件"功能按钮。|
+
+====== tempfile_memory ======
+^ 类型 | Array |
+^ 默认 | <nowiki>{"mcac":10,"mcom":10,"menc":10}</nowiki> |
+^ 说明 | 临时文件内存处理机制的内存占用量。单位为：MB。 \\ 结构为：<code php>
+Array(
+    'mcac' => 10, // mail_cache
+    'mcom' => 10, // mail_compress
+    'menc' => 10, // mail_encode
+)
+</code> |
+
+====== activesync_remote_wipe ======
+^ 类型 | string |
+^ 默认 | 0 |
+^ 说明 | 是否启用 ActiveSync 的远程擦除功能。 |
+
+====== reserve_acct_name ======
+^ 类型 | Array |
+^ 默认 | <nowiki>[]</nowiki> |
+^ 说明 | 系统保留的用户名。除了此配置之外，以下用户名也是系统保留用户：mailer-daemon, mail-noreply, noreply, mail-users. \\ 结构为：<code php>
+Array(
+    'user_1',
+    'user_2',
+    // ...
+)
+</code> |
+
+====== maildecode_html_formator ======
+^ 类型 | String |
+^ 默认 | 1 |
+^ 说明 | 处理邮件 html 部分的格式化器类型。<code>
+1: 只使用 dom 进行修复和处理；
+2: 预先使用 tidy 进行修复之后再用 dom 处理。</code> |
+
+====== antivirus ======
+^ 类型 | String |
+^ 默认 | 0 |
+^ 说明 | 是否开启查毒功能 |
+
+====== antivirus_set ======
+^ 类型 | String |
+^ 默认 | <nowiki>{"timeout":"20"}</nowiki> |
+^ 说明 | 查毒功能设置。结构如下：<code php>
+Object (
+  "timeout":"20", // 连接查毒服务的超时时间，超过此时间还没返回查毒结果则认为查毒失败。
+)
+</code> |
+
+====== event_XXX ======
+===== event_trigger_on_async_after_receive_mail =====
+^ 类型 | String |
+^ 默认 | 1 |
+^ 说明 | 是否触发 after_receive_mail 事件。如果不触发则同时也不向 user_mail_index_event 表中写数据。<code>
+触发: 1
+不触发: 0
+</code> |
+
+===== event_trigger_on_async_after_deliver_remote_mail =====
+^ 类型 | String |
+^ 默认 | 1 |
+^ 说明 | 是否触发 deliver_remote_mail 事件。<code>
+触发: 1
+不触发: 0
+</code> |
+
+===== event_trigger_on_async_after_draft_mail =====
+^ 类型 | Array |
+^ 默认 | <nowiki>{"manual":0,"auto":0}</nowiki> |
+^ 说明 | 触发 draft_mail 事件的配置。结构如下：<code php>
+Array (
+  'manual' => 0, // 手工保存草稿是否触发。1: 触发 | 0: 不触发
+  'auto'   => 0, // 自动保存草稿是否触发。1: 触发 | 0: 不触发
+)
+</code> |
+
+===== event_trigger_on_async_after_update_folder_stat =====
+^ 类型 | String |
+^ 默认 | 1 |
+^ 说明 | 是否触发 update_folder_stat 事件。<code>
+触发: 1
+不触发: 0</code> |
+
+===== event_trigger_on_async_after_change_contacts =====
+^ 类型 | String |
+^ 默认 | 1 |
+^ 说明 | 是否触发通讯录变更事件。<code>
+触发: 1
+不触发: 0</code> |
+
+===== event_mail_index_reserve_time =====
+^ 类型 | String |
+^ 默认 | 24 |
+^ 说明 | 用于事件触发的 user_mail_index_event 表中记录的保存时间，超过此时间会被删除。单位：小时。 \\ 此配置值不能小于 24 小时（由常量 EYOUM_EVENT_MAIL_INDEX_RESERVE_TIME_MIN 配置），防止发生配置错误，导致核心插件（例如建立全文检索等）无法运行的情况。 |
+
+====== api_XXX ======
+===== api_service_auth_token_lifetime =====
+^ 类型 | String |
+^ 默认 | 7200 |
+^ 说明 | API 调用方用标准 auth 方式申请到的 auth_token 在本系统中存放的时间。此存放时间应该比 api_sso_token_lifetime 和 api_feed_token_lifetime 大。单位：秒。 |
+
+===== api_sso_token_lifetime =====
+^ 类型 | String |
+^ 默认 | 60 |
+^ 说明 | API 中 SSO 应用所使用的 token（包括 oauth_access_token 和 auth_token）的生存时间。单位：秒。 |
+
+===== api_feed_token_lifetime =====
+^ 类型 | String |
+^ 默认 | 7200 |
+^ 说明 | API 中 feed 应用所使用的 token（包括 oauth_access_token 和 auth_token）的生存时间。单位：秒。 |
+
+====== phpdaemon_XXX ======
+===== phpdaemon_lifetime =====
+^ 类型 | String |
+^ 默认 | 21600 |
+^ 说明 | PHP daemon 的生存时间，超过此生存时间则自动退出，释放资源。单位：秒。 |
+
+====== imptype_xxx ======
+===== imptype_smssend =====
+^ 类型 | String |
+^ 默认 | eyou |
+^ 说明 | smssend 代码接口实现的 class 的类型。 |
+
+===== imptype_smsnotify =====
+^ 类型 | String |
+^ 默认 | eyou |
+^ 说明 | smsnotify 代码接口实现的 class 的类型。 |
+
+===== imptype_authreg =====
+^ 类型 | String |
+^ 默认 | eyou |
+^ 说明 | authreg 代码接口实现的 class 的类型。 |
+
+===== imptype_uminodeid =====
+^ 类型 | String |
+^ 默认 | eyou |
+^ 说明 |  user mail index 节点 id 算法实现类型。 |
+
+====== gmw_xxx / gmc_xxx ======
+===== gmw_innerapi =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | innerapi worker 连接的 gearman 服务器地址，格式与 php 的 GearmanWorker::addServers() 方法参数一致。 |
+
+===== gmc_innerapi =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | innerapi client 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmw_rtmp_auth =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | rtmp_auth worker 连接的 gearman 服务器地址，格式与 php 的 GearmanWorker::addServers() 方法参数一致。 |
+
+===== gmc_rtmp_auth =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | rtmp_auth client 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmw_timemail_send =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | timemail_send worker 连接的 gearman 服务器地址，格式与 php 的 GearmanWorker::addServers() 方法参数一致。 |
+
+===== gmc_timemail_send =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | timemail_send client 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmw_notebook_remind =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | notebook_remind worker 连接的 gearman 服务器地址，格式与 php 的 GearmanWorker::addServers() 方法参数一致。 |
+
+===== gmc_notebook_remind =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | notebook_remind client 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmw_member_iteration =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | member_iteration worker 连接的 gearman 服务器地址，格式与 php 的 GearmanWorker::addServers() 方法参数一致。 |
+
+===== gmc_member_iteration =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | member_iteration client 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmw_archive_log =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | archive_log worker 连接的 gearman 服务器地址，格式与 php 的 GearmanWorker::addServers() 方法参数一致。 |
+
+===== gmc_archive_log =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | archive_log client 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmw_clear_tempfile =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | clear_tempfile worker 连接的 gearman 服务器地址，格式与 php 的 GearmanWorker::addServers() 方法参数一致。 |
+
+===== gmc_clear_tempfile =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | clear_tempfile client 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmw_async_event =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | async_event worker 连接的 gearman 服务器地址，格式与 php 的 GearmanWorker::addServers() 方法参数一致。 |
+
+===== gmc_async_event =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | async_event client 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmw_event_after_receive_mail =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | event_after_receive_mail worker 连接的 gearman 服务器地址，格式与 php 的 GearmanWorker::addServers() 方法参数一致。 |
+
+===== gmc_event_after_receive_mail =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | event_after_receive_mail client 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmw_event_after_deliver_remote_mail =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | event_after_deliver_remote_mail worker 连接的 gearman 服务器地址，格式与 php 的 GearmanWorker::addServers() 方法参数一致。 |
+
+===== gmc_event_after_deliver_remote_mail =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | event_after_deliver_remote_mail client 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmw_event_after_draft_mail =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | event_after_draft_mail worker 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmc_event_after_draft_mail =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | event_after_draft_mail client 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmw_event_after_change_folder =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | event_after_change_folder worker 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmc_event_after_change_folder =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | event_after_change_folder client 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmw_event_after_update_folder_stat =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | event_after_update_folder_stat worker 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmc_event_after_update_folder_stat =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | event_after_update_folder_stat client 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmw_pop_acct =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | pop_acct worker 连接的 gearman 服务器地址，格式与 php 的 GearmanWorker::addServers() 方法参数一致。 |
+
+===== gmc_pop_acct =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | pop_acct client 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmw_user_migrate =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | user_migrate worker 连接的 gearman 服务器地址，格式与 php 的 GearmanWorker::addServers() 方法参数一致。 |
+
+===== gmc_user_migrate =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | user_migrate client 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmw_searchmail =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | searchmail worker 连接的 gearman 服务器地址，格式与 php 的 GearmanWorker::addServers() 方法参数一致。 |
+
+===== gmc_searchmail =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | searchmail client 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+===== gmw_sms =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | sms worker 连接的 gearman 服务器地址，格式与 php 的 GearmanWorker::addServers() 方法参数一致。 |
+
+===== gmc_sms =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1:4730 |
+^ 说明 | sms client 连接的 gearman 服务器地址，格式与 php 的 GearmanClient::addServers() 方法参数一致。 |
+
+====== lock_timeout_XXX ======
+锁定超时时间系列参数。
+
+判断超时时间设置的依据为：每个业务的最小循环逻辑（例如成员迭代如队列业务的每个用户的如队列处理）所需要的最长时间不大于超时时间的 1/4。也就是超时时间必须至少是业务每个最小循环逻辑的4倍。
+
+===== lock_timeout_mi_in =====
+^ 类型 | String |
+^ 默认 | 21600 |
+^ 说明 | 成员迭代如队列，mi_in 锁定的超时时间。单位：秒。具体参见 [[..:..:lock服务id规则]]。 |
+
+===== lock_timeout_nb_in =====
+^ 类型 | String |
+^ 默认 | 3600 |
+^ 说明 | 记事本提醒入队列，nb_in 锁定的超时时间。单位：秒。具体参见 [[..:..:lock服务id规则]]。 |
+
+===== lock_timeout_eq_scan =====
+^ 类型 | String |
+^ 默认 | 21600 |
+^ 说明 | 组、用户审批队列扫描，eq_scan 锁定的超时时间。单位：秒。具体参见 [[..:..:lock服务id规则]]。 |
+
+====== queue_XXX ======
+===== timemail_queue =====
+^ 类型 | Array |
+^ 默认 | <nowiki>{"num":50,"retry":3600,"timeout":86400}</nowiki> |
+^ 说明 | 定时邮件队列的设置。 \\ 结构为：<code php>
+Array(
+    'num'     => 50,    // 每次扫描的条数
+    'retry'   => 3600,  // 重试的时间间隔。单位：秒。如果队列中的记录已经被标记为"正在发送中"超过一定时间了（即为此参数配置），
+                        //   仍没有被发送出去，则当作本次发送失败，进行重试发送。
+    'timeout' => 86400, // 队列的超时时间。单位：秒。如果队列中的记录被重试过多次之后，超过了一定时间（即为此参数配置）仍在队列中，
+                        //   则认为发送超时，放弃处理。处理的逻辑：select_time 为非零，并且 send_time 已经超过了此配置参数的时间。
+                        //   之所以要限制 select_time 为非零，是为了防止：邮件系统停机维护很久，没有被处理的定时邮件（select_time 为 0）
+                        //   在维护完成启动之后误当成超时而被废弃，其实就是只有被处理过的邮件在一段时间之后还没有被发送出去，则认为超时。
+)
+</code> |
+
+====== rcweb_auth_XXX ======
+===== rcweb_auth_user =====
+^ 类型 | String |
+^ 默认 | admin |
+^ 说明 | rcweb 的认证用户名 |
+
+===== rcweb_auth_password =====
+^ 类型 | String |
+^ 默认 | 空串 |
+^ 说明 | rcweb 的认证密码，如果是空字符串则不允许认证通过。密码的规则和用户密码一致。 |
+
+====== mta_xxx ======
+mta 的整体配置。
+
+===== mta_db_mysql_host =====
+^ 类型 | String |
+^ 默认 | 127.0.0.1 |
+^ 说明 | MTA 连接 MySQL 服务器地址。参见 [[#db_mysql_host]] |
+
+===== mta_db_mysql_port =====
+^ 类型 | String |
+^ 默认 | 3406 |
+^ 说明 | MTA 连接 MySQL 服务器端口。参见 [[#db_mysql_port]] |
+
+===== mta_db_mysql_user =====
+^ 类型 | String |
+^ 默认 | eyou |
+^ 说明 | MTA 连接 MySQL 服务器用户名。参见 [[#db_mysql_user]] |
+
+===== mta_db_mysql_pass =====
+^ 类型 | String |
+^ 默认 | 空字符串 |
+^ 说明 | MTA 连接 MySQL 服务器密码。参见 [[#db_mysql_pass]] |
+
+===== mta_db_mysql_sock =====
+^ 类型 | String |
+^ 默认 | 空字符串 |
+^ 说明 | MTA 连接 MySQL 服务器的 Socket 文件绝对路径。参见 [[#db_mysql_sork]] |
+
+===== mta_dbumi_mysql_user =====
+^ 类型 | String |
+^ 默认 | eyou |
+^ 说明 | MTA 连接 user mail index 库的 MySQL 服务器用户名。参见 [[#dbumi_mysql_user]] |
+
+===== mta_dbumi_mysql_pass =====
+^ 类型 | String |
+^ 默认 | 空字符串 |
+^ 说明 | MTA 连接 user mail index 库的 MySQL 服务器密码。参见 [[#dbumi_mysql_pass]] |
+
+===== mta_dbumi_mysql_dsn =====
+^ 类型 | String |
+^ 默认 | <nowiki>host=127.0.0.1;port=3416;dbname=eyou_mail_index</nowiki> |
+^ 说明 | MTA 连接 user mail index 库的 MySQL 服务器 DSN。参见 [[#dbumi_mysql_dsn]] |
+===== mta_additional_locale_language =====
+^ 类型 | String |
+^ 默认 | 1 |
+^ 说明 | mta 的退信以及错误提示信息是否附加本地的语言信息。 <code> 是 1 | 否 0 </code> |
+
+====== smtp_xxx ======
+smtpd 的系列配置。
+
+===== smtp_printauth_when_ehlo =====
+^ 类型 | String |
+^ 默认 | 1 |
+^ 说明 | 接收到 ehlo 命令时是否打印认证信息 <code> 是 1 | 否 0 </code> |
+
+===== smtp_rcpt_size =====
+^ 类型 | String |
+^ 默认 | 100 |
+^ 说明 | smtpd 可接收信息的最大长度，单位：MB。此参数主要用于防止攻击，所以应该在接受的范围内尽可能调大，起码要比 restrict_user_rcpt_size_max 大，否则将会导致 smtpd 拒收外系统域投递到本系统域的邮件。 |
+
+===== smtp_auth_check_local =====
+^ 类型 | String |
+^ 默认 | 1 |
+^ 说明 | 本地地址发件人发信需要认证（Auth） <code> 开启 1 | 关闭 0 </code> |
+
+===== smtp_auth_check_domain =====
+^ 类型 | String |
+^ 默认 | 1 |
+^ 说明 | 检查 Mail From 和 Rcpt To 至少有一个是本地地址 <code> 是 1 | 否 0 </code> |
+
+===== smtp_auth_check_user =====
+^ 类型 | String |
+^ 默认 | 1 |
+^ 说明 | 检查 Mail From 与 Auth 的地址必须相同 <code> 是 1 | 否 0 </code> |
+
+===== smtp_auth_check_body =====
+^ 类型 | String |
+^ 默认 | 0 |
+^ 说明 | 检查 Mail From 和信头 From 字段的地址必须相同 <code> 是 1 | 否 0 </code> |
+
+===== smtp_mailfrom_check_domain =====
+^类型 | String |
+^默认 | 0 |
+^说明 | 限制的 Mail From 发件人域类型，参数选项为： <code> 0 不限制 | 1 只允许本地域 | 2 只允许外地域 </code> 当smtpd以多个daemon在同一服务器运行时，** 此配置支持 # 规则 **，例如：<code> smtp_mailfrom_check_domain#1 = "1" </code> |
+
+===== smtp_relayhost =====
+^ 类型 | String |
+^ 默认 | 空串 |
+^ 说明 | 允许进行 openrelay 的 IP 地址和网络地址，以逗号 (,) 分隔。 例如：<code> 127.0.0.1,172.16.100.0/24 </code>|
+
+===== smtp_rcpt_num =====
+^ 类型 | String |
+^ 默认 | 100 |
+^ 说明 | 单封邮件最大允许的收件人个数。主要用于限制外域发给本域的信件。 |
+
+====== pop_xxx ======
+pop3d 的系列配置。暂无。
+
+====== local_xxx ======
+local 的系列配置。
+
+===== local_spam_value =====
+^ 类型 | String |
+^ 默认 | 90 |
+^ 说明 | 网关给信件标记的垃圾邮件分值,当分值超过设定值时,邮件系统认为是垃圾信,会将信件保存到垃圾文件夹中,如果设置成0代表不判断垃圾邮件 |
+
+===== local_spam_key  =====
+^ 类型 | String |
+^ 默认 | 空串 |
+^ 说明 | 信头中如果有该标识，则进行垃圾邮件阀值检查，比如 X-Spamvalue，等同于 X-Eyou-Spamvalue，用于邮件和其他病毒网管结合 |
+
+===== local_ignore_sender =====
+^ 类型 | Array |
+^ 默认 | <nowiki>[]</nowiki> |
+^ 说明 | 如果邮件的发件人在此参数中，那么 local 就不再做自动转寄和自动回复处理。主要用于防止特殊的系统邮件导致的循环投递。格式为：<code php>
+array(
+    'gw-notify@eyou.net',
+    'gw-noreply@eyou.net',
+    // ...
+)
+</code> |
+
+====== remote_xxx ======
+remote 的系列配置。
+
+===== remote_smtproute =====
+^ 类型 | String |
+^ 默认 | 空串 |
+^ 说明 | remote 远程投递路由，投递远程邮件时，直接将信件发送到路由指定的 主机地址（或 IP 地址）和端口（可以不设置，默认为25）。格式是：HOSTNAME[:PORT] / IP[:PORT]。 \\ \\ **注意：此功能优先级高于 remote_relay_domain 功能。** \\ \\ 例如： <code ini>
+; 不指定端口则默认为 25
+remote_smtproute = "192.168.0.1"
+; 或
+remote_smtproute = "test.com:26"
+; 或
+remote_smtproute = "192.168.0.2:26"</code> |
+
+===== remote_helo_host =====
+^ 类型 | String |
+^ 默认 | server_me 配置的值 |
+^ 说明 | helo 标识（可以是 IP，在 remote 中使用） |
+
+===== remote_relay_domain =====
+^ 类型 | String |
+^ 默认 | 空串 |
+^ 说明 | remote 转发邮件域，投递远程邮件时，将特定域名（本地不存在的域）的信转发到特定的 主机地址（或 IP 地址，且不能为本机地址）和端口（可以不设置，默认为25） 。格式是：HOSTNAME[:PORT] / IP[:PORT]。**此配置属于 # 规则。** \\ 例如： <code ini>
+; 不指定端口则默认为 25
+remote_relay_domain#testa.com = "192.168.0.1"
+
+remote_relay_domain#testb.com = "192.168.0.1:26"
+remote_relay_domain#testc.com = "bbb.com:25"
+</code> |
+
+===== remote_enable_replace_domain =====
+^ 类型 | String |
+^ 默认 | 0 |
+^ 说明 | 是否开启 remote替换域名 <code> 开启 1 | 关闭 0 </code> |
+
+===== remote_replace_domain =====
+^ 类型 | String |
+^ 默认 | 空串 |
+^ 说明 | remote 替换域名，投递远程邮件时，将信头的From、Return-Path、Reply-To字段的 srcdomain 替换成 destdomain。**此配置属于 # 规则。** \\ 例如：<code ini>
+remote_replace_domain#srcdomain = "destdomain"
+remote_replace_domain#src.com = "dest.com"
+</code> |
+
+===== remote_deliver_event =====
+^ 类型 | String |
+^ 默认 | 0 |
+^ 说明 | remote 在投递远程邮件的时候是否触发 innerapi 的投递事件。 \\ <code>
+触发: 1
+不触发：0
+</code> |
+
+~ODT~~
