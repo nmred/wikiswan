@@ -94,8 +94,8 @@ class sw_sync_wiki
 	 */
 	public function run()
 	{
-		$this->_create_makefile();	
 		$this->_create_makefile_ini();
+		$this->_create_makefile();	
 	}
 
 	// }}}
