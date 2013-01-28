@@ -8,7 +8,7 @@ INSTALL0 = /usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)
 
 all:
 dokuwiki-128.png.: dokuwiki-128.png
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/dokuwiki-128.png
 
 
 INS_DIRS = \

@@ -1,16 +1,18 @@
 TARGET0 = /usr/local/wikiswan/data/pages/%E8%B5%84%E6%BA%90
 
 SUBDIRS = 
-INC_SRC0 = 源代码仓库.txt. 产品下载列表.txt.
+INC_SRC0 = .源代码仓库.txt.swp. 源代码仓库.txt. 产品下载列表.txt.
  
 INSTALL0 = /usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)
 
 
 all:
+.源代码仓库.txt.swp.: .源代码仓库.txt.swp
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/.%E6%BA%90%E4%BB%A3%E7%A0%81%E4%BB%93%E5%BA%93.txt.swp
 源代码仓库.txt.: 源代码仓库.txt
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/%E6%BA%90%E4%BB%A3%E7%A0%81%E4%BB%93%E5%BA%93.txt
 产品下载列表.txt.: 产品下载列表.txt
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/%E4%BA%A7%E5%93%81%E4%B8%8B%E8%BD%BD%E5%88%97%E8%A1%A8.txt
 
 
 INS_DIRS = \

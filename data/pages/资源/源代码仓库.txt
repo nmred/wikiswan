@@ -1,1 +1,51 @@
-期待完善中.....
+===== 源代码托管地址 =====
+
+==== swansoft 软件主线开发代码  ====
+
+  * GITHUB:[[https://github.com/nmred/swansoft| GITHUB地址]]
+
+  * RO:   [[git://github.com/nmred/swansoft.git]]
+
+  * HTTP: [[https://github.com/nmred/swansoft.git]]
+
+  * SSH:  [[git@github.com:nmred/swansoft.git]]
+
+==== dev_swan 开发工具库  ====
+
+  * GITHUB:[[https://github.com/nmred/dev_swan| GITHUB地址]]
+
+  * RO:   [[git://github.com/nmred/dev_swan.git]]
+
+  * HTTP: [[https://github.com/nmred/dev_swan.git]]
+
+  * SSH:  [[git@github.com:nmred/dev_swan.git]]
+
+==== wikiswan Wiki 系统配置和数据 ====
+
+  * GITHUB:[[https://github.com/nmred/wikiswan| GITHUB地址]]
+
+  * RO:   [[git://github.com/nmred/wikiswan.git]]
+
+  * HTTP: [[https://github.com/nmred/wikiswan.git]]
+
+  * SSH:  [[git@github.com:nmred/wikiswan.git]]
+
+==== swanopensource 第三方开源软件包 ====
+
+  * GITHUB:[[https://github.com/nmred/swanopensource| GITHUB地址]]
+
+  * RO:   [[git://github.com/nmred/swanopensource.git]]
+
+  * HTTP: [[https://github.com/nmred/swanopensource.git]]
+
+  * SSH:  [[git@github.com:nmred/swanopensource.git]]
+
+==== 仓库说明 ====
+
+  * swansoft 仓库是监控系统产品的代码仓库
+
+  * dev_swan 是辅助开发工具库，其运行时依赖 swansoft 的环境，想使用其内部的工具需下载最新版的 swansoft [[下载地址]]
+
+  * wikiswan 是开发 wiki ，运行依赖于 swansoft 所有的开发环境， ** 注意：只有在开发环境下才可运行，代码仓库只是托管的配置和数据，需要自己下载 dukuwiki 的最新程序 ** [[http://www.splitbrain.org/projects/dokuwiki|下载地址]]
+
+  * swanopensource 仓库是存放第三方开源软件包的仓库，这个仓库是有打包程序自动调用的, 无须人工干预.

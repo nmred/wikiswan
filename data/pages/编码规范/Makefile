@@ -8,15 +8,15 @@ INSTALL0 = /usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)
 
 all:
 c代码规范.txt.: c代码规范.txt
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/c%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83.txt
 html5_css代码规范.txt.: html5_css代码规范.txt
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/html5_css%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83.txt
 shell代码规范.txt.: shell代码规范.txt
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/shell%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83.txt
 php代码规范.txt.: php代码规范.txt
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/php%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83.txt
 js代码规范.txt.: js代码规范.txt
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/js%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83.txt
 
 
 INS_DIRS = \

@@ -8,7 +8,7 @@ INSTALL0 = /usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)
 
 all:
 index.txt.: index.txt
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/index.txt
 
 
 INS_DIRS = \

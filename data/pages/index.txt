@@ -20,6 +20,9 @@ Wiki的维护靠大家，请大家在不耽搁工作的大前提下共同完善�
 ==== 常用网址导航 ====
   * [[http://www.baidu.com|百度]]
   * [[http://www.php.net|PHP 官网]]
+  * [[http://vimcdoc.sourceforge.net/doc/help.html|VIM 中文文档]]
+  * 前端 JS / HTML5
+    * [[http://www.webresourcesdepot.com| 不错的前端素材资料]]
 
 ==== 规范手册 ====
   * [[编码规范:PHP代码规范|PHP 代码规范]]

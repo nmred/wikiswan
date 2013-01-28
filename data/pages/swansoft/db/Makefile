@@ -1,16 +1,14 @@
 TARGET0 = /usr/local/wikiswan/data/pages/swansoft/db
 
 SUBDIRS = 
-INC_SRC0 = .mysql_desc.txt.swp. mysql_desc.txt.
+INC_SRC0 = mysql_desc.txt.
  
 INSTALL0 = /usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)
 
 
 all:
-.mysql_desc.txt.swp.: .mysql_desc.txt.swp
-	$(INSTALL0)
 mysql_desc.txt.: mysql_desc.txt
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/mysql_desc.txt
 
 
 INS_DIRS = \

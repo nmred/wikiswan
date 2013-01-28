@@ -8,47 +8,47 @@ INSTALL0 = /usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)
 
 all:
 entities.conf.: entities.conf
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/entities.conf
 mediameta.php.: mediameta.php
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/mediameta.php
 users.auth.php.: users.auth.php
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/users.auth.php
 acronyms.conf.: acronyms.conf
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/acronyms.conf
 smileys.conf.: smileys.conf
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/smileys.conf
 acl.auth.php.: acl.auth.php
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/acl.auth.php
 users.auth.php.dist.: users.auth.php.dist
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/users.auth.php.dist
 dokuwiki.php.: dokuwiki.php
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/dokuwiki.php
 mysql.conf.php.example.: mysql.conf.php.example
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/mysql.conf.php.example
 local.php.: local.php
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/local.php
 plugins.required.php.: plugins.required.php
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/plugins.required.php
 acl.auth.php.dist.: acl.auth.php.dist
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/acl.auth.php.dist
 local.php.bak.: local.php.bak
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/local.php.bak
 plugins.php.: plugins.php
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/plugins.php
 interwiki.conf.: interwiki.conf
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/interwiki.conf
 scheme.conf.: scheme.conf
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/scheme.conf
 license.php.: license.php
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/license.php
 wordblock.conf.: wordblock.conf
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/wordblock.conf
 local.php.dist.: local.php.dist
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/local.php.dist
 plugins.local.php.: plugins.local.php
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/plugins.local.php
 mime.conf.: mime.conf
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/mime.conf
 
 
 INS_DIRS = \
