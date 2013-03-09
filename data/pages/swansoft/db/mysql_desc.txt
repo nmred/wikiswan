@@ -49,7 +49,7 @@
 ^ 描述 | 记录监控设备的每个项目rrd信息 |
 ^ Engine | InnoDB |
 ^ 编码 | utf8 |
-^ 主键 | `project_id`|
+^ 主键 | `device_id`,`project_name`|
 ^ 索引 | `device_id`|
 
 ^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
