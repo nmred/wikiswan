@@ -1,14 +1,12 @@
 TARGET0 = /usr/local/wikiswan/data/pages/swansoft
 
-SUBDIRS = db
-INC_SRC0 = .index.txt.swp. index.txt.
+SUBDIRS = db module
+INC_SRC0 = index.txt.
  
 INSTALL0 = /usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)
 
 
 all:
-.index.txt.swp.: .index.txt.swp
-	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/.index.txt.swp
 index.txt.: index.txt
 	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/index.txt
 

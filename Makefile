@@ -1,14 +1,16 @@
 TARGET0 = /usr/local/wikiswan/
 
-SUBDIRS = data conf
-INC_SRC0 = sw_sync_wiki.
+SUBDIRS = conf data
+INC_SRC0 = sw_sync_wiki. .gitignore.
  
 INSTALL0 = /usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)
 
 
 all:
 sw_sync_wiki.: sw_sync_wiki
-	$(INSTALL0)
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/sw_sync_wiki
+.gitignore.: .gitignore
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/.gitignore
 
 
 INS_DIRS = \

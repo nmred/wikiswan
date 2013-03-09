@@ -1,16 +1,16 @@
 TARGET0 = /usr/local/wikiswan/data/pages
 
-SUBDIRS = swansoft 资源 dev_swan wikiswan 编码规范 知识库
-INC_SRC0 = index.txt. example.txt.
+SUBDIRS = 知识库 wikiswan 编码规范 dev_swan swansoft 资源
+INC_SRC0 = example.txt. index.txt.
  
 INSTALL0 = /usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)
 
 
 all:
-index.txt.: index.txt
-	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/index.txt
 example.txt.: example.txt
 	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/example.txt
+index.txt.: index.txt
+	/usr/bin/install -m 644 -o swan -g swan $< $(TARGET0)/index.txt
 
 
 INS_DIRS = \

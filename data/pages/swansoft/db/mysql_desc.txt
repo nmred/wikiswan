@@ -2,6 +2,46 @@
 
 ===== swan_soft 数据库 =====
 
+====sequence_global====
+^ 表名 | sequence_global |
+^ 描述 | 维护全局的数据表的唯一序列号 |
+^ Engine | InnoDB |
+^ 编码 | utf8 |
+^ 主键 | `table_name`|
+
+^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
+| table_name | varchar | false | 64 |  |   |   |
+| ::: | 维护序列号的表名称 ||||||
+| sequence_id | int | false | 11 |  |   | true |
+| ::: | 自增长 ID ||||||
+====sequence_device====
+^ 表名 | sequence_device |
+^ 描述 | 设备成员数据表的唯一序列号 |
+^ Engine | InnoDB |
+^ 编码 | utf8 |
+^ 主键 | `device_id`,`table_name`|
+
+^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
+| device_id | int | false | 11 |  |   | true |
+| ::: | 设备 ID ||||||
+| table_name | varchar | false | 64 |  |   |   |
+| ::: | 维护序列号的表名称 ||||||
+| sequence_id | int | false | 11 |  |   | true |
+| ::: | 自增长 ID ||||||
+====sequence_project====
+^ 表名 | sequence_project |
+^ 描述 | 项目成员数据表的唯一序列号 |
+^ Engine | InnoDB |
+^ 编码 | utf8 |
+^ 主键 | `project_id`,`table_name`|
+
+^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
+| project_id | int | false | 11 |  |   | true |
+| ::: | 项目 ID ||||||
+| table_name | varchar | false | 64 |  |   |   |
+| ::: | 维护序列号的表名称 ||||||
+| sequence_id | int | false | 11 |  |   | true |
+| ::: | 自增长 ID ||||||
 ====device====
 ^ 表名 | device |
 ^ 描述 | 监控的设备信息表 |
@@ -10,7 +50,7 @@
 ^ 主键 | `device_id`|
 
 ^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
-| device_id | int | false | 11 |  | true | true |
+| device_id | int | false | 11 |  |   | true |
 | ::: | 设备 id ||||||
 | device_name | varchar | false | 255 |  |   |   |
 | ::: | 设备名称(唯一) ||||||
@@ -50,10 +90,9 @@
 ^ Engine | InnoDB |
 ^ 编码 | utf8 |
 ^ 主键 | `device_id`,`project_name`|
-^ 索引 | `device_id`|
 
 ^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
-| project_id | int | false | 11 |  | true | true |
+| project_id | int | false | 11 |  |   | true |
 | ::: | 项目 id ||||||
 | project_name | varchar | false | 64 |  |   |   |
 | ::: | 监控设备项目名称 ||||||
@@ -68,12 +107,10 @@
 ^ 描述 | 记录每个监控项目对应的多个字段属性 |
 ^ Engine | InnoDB |
 ^ 编码 | utf8 |
-^ 主键 | `ds_id`|
-^ 索引 | `project_id`,`device_id`|
-^ 索引 | `project_id`|
+^ 主键 | `ds_id`,`project_id`|
 
 ^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
-| ds_id | int | false | 11 |  | true | true |
+| ds_id | int | false | 11 |  |   | true |
 | ::: | DS id ||||||
 | ds_name | varchar | false | 64 |  |   |   |
 | ::: | 属性名 规则和变量命名一样，限制不能输入中文，这个是有意义的字段 ||||||
@@ -100,12 +137,10 @@
 ^ 描述 | 记录每个监控项目对数据的归档规则(合并数据的规则) |
 ^ Engine | InnoDB |
 ^ 编码 | utf8 |
-^ 主键 | `rra_id`|
-^ 索引 | `project_id`,`device_id`|
-^ 索引 | `project_id`|
+^ 主键 | `rra_id`,`project_id`|
 
 ^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
-| rra_id | int | false | 11 |  | true | true |
+| rra_id | int | false | 11 |  |   | true |
 | ::: | RRA id ||||||
 | project_id | int | false | 11 | 0 |   | true |
 | ::: | 关联 device_project.project_id ||||||
@@ -128,7 +163,7 @@
 ^ 索引 | `graph_id`|
 
 ^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
-| cdef_id | int | false | 11 |  | true | true |
+| cdef_id | int | false | 11 |  |   | true |
 | ::: | CDEF id ||||||
 | graph_id | int | false | 11 | 0 |   | true |
 | ::: | 关联 rrd_graph.graph_id ||||||
@@ -145,7 +180,7 @@
 ^ 索引 | `graph_id`|
 
 ^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
-| line_id | int | false | 11 |  | true | true |
+| line_id | int | false | 11 |  |   | true |
 | ::: | 线条ID id ||||||
 | graph_id | int | false | 11 | 0 |   | true |
 | ::: | 关联 rrd_graph.graph_id ||||||
@@ -166,7 +201,7 @@
 ^ 索引 | `line_id`|
 
 ^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
-| gprint_id | int | false | 11 |  | true | true |
+| gprint_id | int | false | 11 |  |   | true |
 | ::: | GPRINT id ||||||
 | line_id | int | false | 11 | 0 |   | true |
 | ::: | 关联 rrd_line_area.line_id ||||||
