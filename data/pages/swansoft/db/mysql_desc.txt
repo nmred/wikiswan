@@ -33,18 +33,20 @@
 ^ 描述 | 项目成员数据表的唯一序列号 |
 ^ Engine | InnoDB |
 ^ 编码 | utf8 |
-^ 主键 | `project_id`,`table_name`|
+^ 主键 | `device_id`,`project_id`,`table_name`|
 
 ^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
+| device_id | int | false | 11 |  |   | true |
+| ::: | 设备 ID ||||||
 | project_id | int | false | 11 |  |   | true |
 | ::: | 项目 ID ||||||
 | table_name | varchar | false | 64 |  |   |   |
 | ::: | 维护序列号的表名称 ||||||
 | sequence_id | int | false | 11 |  |   | true |
 | ::: | 自增长 ID ||||||
-====device====
-^ 表名 | device |
-^ 描述 | 监控的设备信息表 |
+====device_key====
+^ 表名 | device_key |
+^ 描述 | 监控的设备关键表 |
 ^ Engine | InnoDB |
 ^ 编码 | utf8 |
 ^ 主键 | `device_id`|
@@ -54,12 +56,36 @@
 | ::: | 设备 id ||||||
 | device_name | varchar | false | 255 |  |   |   |
 | ::: | 设备名称(唯一) ||||||
+====device_basic====
+^ 表名 | device_basic |
+^ 描述 | 监控的设备基本信息表 |
+^ Engine | InnoDB |
+^ 编码 | utf8 |
+^ 主键 | `device_id`|
+
+^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
+| device_id | int | false | 11 |  |   | true |
+| ::: | 设备 id ||||||
 | device_display_name | varchar | false | 255 |  |   |   |
 | ::: | 设备显示名称 ||||||
 | host | varchar | false | 32 |  |   |   |
 | ::: | 设备的主机名 ||||||
 | port | smallint | true | 6 | 161 |   | true |
 | ::: | 设备的端口号，默认是  SNMP 的默认端口：161 ||||||
+| is_delete | tinyint | true | 1 | 0 |   | true |
+| ::: | 是否是已经删除的设备 ||||||
+| delete_time | int | false | 10 |   |   | true |
+| ::: | 设备删除时间 ||||||
+====device_snmp====
+^ 表名 | device_snmp |
+^ 描述 | 监控的设备 SNMP 信息表 |
+^ Engine | InnoDB |
+^ 编码 | utf8 |
+^ 主键 | `device_id`|
+
+^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
+| device_id | int | false | 11 |  |   | true |
+| ::: | 设备 id ||||||
 | snmp_version | tinyint | true | 2 | 0 |   | true |
 | ::: | SNMP 协议的版本 0:VERSION_1, 1:VERSION_2 2:VERSION_3 ||||||
 | snmp_method | tinyint | true | 2 | 0 |   | true |
@@ -84,9 +110,9 @@
 | ::: | 密钥的协议算法 0: DES  1: AES ||||||
 | priv_passphrase | varchar | true | 32 |  |   |   |
 | ::: | 认证密钥 ||||||
-====device_project====
-^ 表名 | device_project |
-^ 描述 | 记录监控设备的每个项目rrd信息 |
+====project_key====
+^ 表名 | project_key |
+^ 描述 | 记录监控设备的项目关键表 |
 ^ Engine | InnoDB |
 ^ 编码 | utf8 |
 ^ 主键 | `device_id`,`project_name`|
@@ -97,17 +123,33 @@
 | project_name | varchar | false | 64 |  |   |   |
 | ::: | 监控设备项目名称 ||||||
 | device_id | int | false | 11 | 0 |   | true |
-| ::: | 关联 device.device_id ||||||
+| ::: | 关联 device_key.device_id ||||||
+====project_basic====
+^ 表名 | project_basic |
+^ 描述 | 记录监控设备的项目基本信息表 |
+^ Engine | InnoDB |
+^ 编码 | utf8 |
+^ 主键 | `device_id`,`project_id`|
+
+^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
+| project_id | int | false | 11 |  |   | true |
+| ::: | 项目 id ||||||
+| device_id | int | false | 11 | 0 |   | true |
+| ::: | 关联 device_id.device_id ||||||
 | step | int | true | 6 | 300 |   | true |
 | ::: | rrd刷新周期 默认值 300s ||||||
 | start_time | int | true | 11 |  |   | true |
 | ::: | 数据库的起始时间 默认是now() - 10s ||||||
-====rrd_ds====
-^ 表名 | rrd_ds |
-^ 描述 | 记录每个监控项目对应的多个字段属性 |
+| is_delete | tinyint | true | 1 | 0 |   | true |
+| ::: | 是否是已经删除的项目 ||||||
+| delete_time | int | false | 10 |   |   | true |
+| ::: | 项目删除时间 ||||||
+====project_data_source====
+^ 表名 | project_data_source |
+^ 描述 | 记录每个监控项目对应的所有数据源 |
 ^ Engine | InnoDB |
 ^ 编码 | utf8 |
-^ 主键 | `ds_id`,`project_id`|
+^ 主键 | `ds_name`,`project_id`,`device_id`|
 
 ^ 字段名 ^ 类型 ^ nullable ^ 宽度 ^ 默认值  ^ auto ^ unsigned ^
 | ds_id | int | false | 11 |  |   | true |
@@ -115,9 +157,9 @@
 | ds_name | varchar | false | 64 |  |   |   |
 | ::: | 属性名 规则和变量命名一样，限制不能输入中文，这个是有意义的字段 ||||||
 | project_id | int | false | 11 | 0 |   | true |
-| ::: | 关联 device_project.project_id ||||||
+| ::: | 关联 project_key.project_id ||||||
 | device_id | int | false | 11 | 0 |   | true |
-| ::: | 关联 device.device_id (可能以后会有意义) ||||||
+| ::: | 关联 device_key.device_id (可能以后会有意义) ||||||
 | get_method | tinyint | true | 2 | 0 |   | true |
 | ::: | 数据获取方式 0 :通过 SNMP 协议获取 1:通过其他方式，例如脚本等 ||||||
 | object_type | char | true | 32 |  |   |   |
@@ -132,8 +174,8 @@
 | ::: | 传递数据的最小限制 默认不限制 ||||||
 | max | varchar | true | 32 | U |   |   |
 | ::: | 传递数据的最大限制 默认不限制 ||||||
-====rrd_rra====
-^ 表名 | rrd_rra |
+====project_archive====
+^ 表名 | project_archive |
 ^ 描述 | 记录每个监控项目对数据的归档规则(合并数据的规则) |
 ^ Engine | InnoDB |
 ^ 编码 | utf8 |
@@ -143,9 +185,9 @@
 | rra_id | int | false | 11 |  |   | true |
 | ::: | RRA id ||||||
 | project_id | int | false | 11 | 0 |   | true |
-| ::: | 关联 device_project.project_id ||||||
+| ::: | 关联 project_key.project_id ||||||
 | device_id | int | false | 11 | 0 |   | true |
-| ::: | 关联 device.device_id (可能以后会有意义) ||||||
+| ::: | 关联 device_key.device_id (可能以后会有意义) ||||||
 | rra_cf | tinyint | true | 2 | 0 |   | true |
 | ::: | 归档策略算法 0 : AVERAGE 1:MIN 2:MAX 3:LAST ||||||
 | rra_xff | float | true | 11 | 0.5 |   |   |
