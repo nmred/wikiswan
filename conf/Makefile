@@ -1,4 +1,4 @@
-TARGET0 = /usr/local/wikiswan/conf
+TARGET0 = /usr/local/swan/conf
 
 SUBDIRS = 
 INC_SRC0 = acl.auth.php. users.auth.php.dist. dokuwiki.php. users.auth.php. plugins.php. scheme.conf. mediameta.php. license.php. wordblock.conf. plugins.required.php. mysql.conf.php.example. local.php.bak. smileys.conf. local.php. local.php.dist. acronyms.conf. interwiki.conf. mime.conf. acl.auth.php.dist. plugins.local.php. entities.conf.
