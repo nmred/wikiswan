@@ -1,0 +1,35 @@
+===== DEV SWAN 开源软件列表 =====
+
+==== httpd-2.4.4 ====
+
+  * 安装依赖 pcre 、apr、apr-util
+  * [[http://124.254.47.35/download/38073556/53207897/7/gz/50/165/1361840964402_677/httpd-2.4.4.tar.gz | 下载地址 ]]
+
+==== mysql-5.5.30 ====
+
+  * 下载的是二进制 tar 包无需编译
+  * 下载后安装到目标目录后删除 mysql-test、lib/plugin/libdaemon_example* 防止不必要的依赖
+  * [[http://www.mysql.com/| 下载地址 ]]
+
+==== php-5.4.13 ====
+
+  * 编译 GD 库时可能有问题，需要替换 gd_io.h ,以后版本可能不用
+  * [[http://cn2.php.net/distributions/php-5.4.13.tar.gz | 下载地址 ]]
+
+==== rrdtool-1.4.7 ====
+
+  * 先执行yum install -y cairo-devel libxml2-devel pango-devel pango libpng-devel freetype freetype-devel libart_lgpl-devel pear pear-devel 把依赖安装好 ,注意在 centos5.5中千万不要用互联网 yum 更新 gcc* 会出现httpd不能编译的情况
+  * ./configure --disable-perl --disable-ruby --disable-lua --disable-python --prefix=/usr/local/dev_swan/opt/rrdtool
+  * make && make install 
+  * [[http://218.249.165.47/download/31535906/39751470/5/gz/14/20/1351756608782_532/rrdtool-1.4.7.tar.gz| 下载地址 ]]
+
+===== DEV SWAN 实验性开源软件 =====
+
+==== redis-2.6.12 ====
+
+  * 先编辑src/.make_settings里的OPT，改为OPT=-O2 -march=i686 
+  * make && make test 在test的时候可能会出现tcl版本低的现象，安装tcl:http://www.linuxfromscratch.org/blfs/view/cvs/general/tcl.html  
+  * 
+  * make PREFIX=/usr/local/dev_swan/opt/redis/ install 
+  * [[http://redis.googlecode.com/files/redis-2.6.12.tar.gz| 下载地址 ]]
+	
