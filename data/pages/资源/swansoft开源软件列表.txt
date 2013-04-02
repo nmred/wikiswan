@@ -2,22 +2,26 @@
 
 ==== httpd-2.4.4 ====
 
+  * 最后更新时间：未更新
   * 安装依赖 pcre 、apr、apr-util
   * [[http://124.254.47.35/download/38073556/53207897/7/gz/50/165/1361840964402_677/httpd-2.4.4.tar.gz | 下载地址 ]]
 
 ==== mysql-5.5.30 ====
 
+  * 最后更新时间：2013-03-28
   * 下载的是二进制 tar 包无需编译
   * 下载后安装到目标目录后删除 mysql-test、lib/plugin/libdaemon_example* 防止不必要的依赖
   * [[http://www.mysql.com/| 下载地址 ]]
 
 ==== php-5.4.13 ====
 
+  * 最后更新时间：2013-03-30
   * 编译 GD 库时可能有问题，需要替换 gd_io.h ,以后版本可能不用
   * [[http://cn2.php.net/distributions/php-5.4.13.tar.gz | 下载地址 ]]
 
 ==== rrdtool-1.4.7 ====
 
+  * 最后更新时间：2013-03-31
   * 单独编译
   * 先执行yum install -y cairo-devel libxml2-devel pango-devel pango libpng-devel freetype freetype-devel libart_lgpl-devel pear pear-devel 把依赖安装好 ,注意在 centos5.5中千万不要用互联网 yum 更新 gcc* 会出现httpd不能编译的情况
   * ./configure --disable-perl --disable-ruby --disable-lua --disable-python --prefix=/usr/local/swan/opt/rrdtool
@@ -26,8 +30,10 @@
 
 ==== net-snmp-5.7.2 ====
 
+  * 最后更新时间：2013-04-02
   * 需要编译 PHP 加 --with-snmp=snmp dir
   * tar -zxf net-snmp-5.7.2.tar.gz
   * cd net-snmp-5.7.2
   * ./configure --prefix=/usr/local/swan/opt/snmp --enable-mfd-rewrites --with-default-snmp-version="2" --with-sys-contact="nmred_2008@126.com" --with-sys-location="China" --with-logfile="/usr/local/swan/log/snmpd.log" --enable-developer --with-persistent-directory="/usr/local/swan/data/snmp"
   * make && make install
+  * [[http://garr.dl.sourceforge.net/project/net-snmp/net-snmp/5.7.2/net-snmp-5.7.2.tar.gz | 下载地址]]
