@@ -36,7 +36,36 @@
   * ./configure --prefix=/usr/local/swan/opt/snmp --enable-mfd-rewrites --with-default-snmp-version="2" --with-sys-contact="nmred_2008@126.com" --with-sys-location="China" --with-logfile="/usr/local/swan/log/snmpd.log" --enable-developer --with-persistent-directory="/usr/local/swan/data/snmp"
   * make && make install
   * [[http://garr.dl.sourceforge.net/project/net-snmp/net-snmp/5.7.2/net-snmp-5.7.2.tar.gz | 下载地址]]
-	
+
+==== xdebug-2.2.2 ====
+
+  * 最后更新时间: 2013-04-03
+  * 需要动态编译进 PHP 中 
+  * tar -zxf xdebug-2.2.2.tgz
+  * cd xdebug-2.2.2
+  * /usr/local/dev_swan/opt/php/bin/phpize
+  * ./configure --with-php-config=/usr/local/dev_swan/opt/php/bin/php-config
+  * make && make install
+  * 在配置文件中添加 `zend_extension=/usr/local/dev_swan/opt/php/lib/php/extensions/no-debug-zts-20100525/xdebug.so`
+  * [[http://xdebug.org/files/xdebug-2.2.2.tgz | 下载地址]]
+
+==== PHPUnit 3.8 ====
+
+  * 最后更新时间: 2013-04-03
+  * PHP 编写的测试框架 利用 pear 安装
+  * pear config-set auto_discover 1
+  * pear install pear.phpunit.de/PHPUnit
+  * 配置 php.ini includes='/usr/local/dev_swan/opt/php/lib/php/' 
+  * [[https://github.com/sebastianbergmann/phpunit/| 下载地址]]
+
+==== PHP_CodeCoverage 1.3 ====
+
+  * 最后更新时间: 2013-04-03
+  * PHP 编写的测试代码覆盖率 利用 pear 安装
+  * pear config-set auto_discover 1
+  * pear install pear.phpunit.de/PHP_CodeCoverage
+  * 配置 php.ini includes='/usr/local/dev_swan/opt/php/lib/php/' 
+  * [[https://github.com/sebastianbergmann/php-code-coverage| 下载地址]]
 
 ===== DEV SWAN 实验性开源软件 =====
 

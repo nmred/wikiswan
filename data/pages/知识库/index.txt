@@ -1,1 +1,22 @@
-ss期待完善......
+==== C  ====
+  * [[知识库:c语言:c语言中static用法总结 | C语言中static用法总结]]
+  * [[知识库:c语言:c语言中extern关键字详解|C语言中extern关键字详解]]
+  * [[c语言:SHELL代码规范|SHELL 代码规范]]
+  * [[c语言:JS代码规范|JS 代码规范]]
+  * [[c语言:HTML5_CSS代码规范|HTML5/CSS 代码规范]]
+
+<code>
+#include <stdio.h>
+
+int main(void)
+{
+	
+}
+</code>
+==== PHP ====
+
+==== Linux ====
+
+==== 运维相关 ====
+
+==== Web相关 ====
