@@ -72,5 +72,167 @@ int exe(int x)
  
 === (3) 在多个文件中声明外部结构体变量 ===
 前一节中，只是适合一般变量的外部声明，但是对于声明外部结构体变量时，则有些不同，需要加以注意。 \\ 
+例子: \\ 
+文件 a.c 的内容: \\ 
 
+<code c>
+#include <stdio.h>                                                                     
+#include "b.h"                                                                         
+#include "c.h"                                                                         
+
+A_class local_post = {1, 2, 3};                                                        
+A_class next_post = {10, 9, 8};                                                        
+
+int main(int argc, char *argv[])                                                       
+{                                                                                      
+	A_class ret;                                                                       
+	print("fist point", local_post);                                                   
+	print("second point", next_post);                                                  
+	ret = fun(local_post, next_post);                                                  
+	printf("the vector is (%d %d %d)\n", ret.x, ret.y, ret.z);                         
+	return 0;                                                                          
+}
+</code>
+文件 b.h 的内容: \\ 
+<code c>
+#ifndef __B_H                                                                          
+#define __B_H                                                                          
+#if 1                                                                                  
+typedef struct {                                                                       
+	int x;                                                                             
+	int y;                                                                             
+	int z;                                                                             
+} A_class;                                                                             
+#endif                                                                                 
+
+extern A_class local_post;  // 外部结构体变量声明                                      
+extern A_class fun(A_class x, A_class y); // 接口函数声明                              
+#endif
+</code>
+文件 b.c 的内容： \\ 
+<code c>
+#include <stdio.h>                                                                     
+#include "b.h"                                                                         
+
+A_class fun(A_class first, A_class next)                                               
+{                                                                                      
+	A_class ret;                                                                       
+	ret.x = next.x - first.x;                                                          
+	ret.y = next.y - first.y;                                                          
+	ret.z = next.z - first.z;                                                          
+	return ret;                                                                        
+}  
+</code>
+
+文件 c.h 的内容: \\ 
+<code c>
+#ifndef __C_H                                                                          
+#define __C_H                                                                          
+extern int print(char *, A_class post);                                                
+#endif
+</code>
+
+文件 c.c 的内容: \\ 
+<code c>
+#include <stdio.h>                                                                     
+#include "b.h"                                                                         
+
+int print(char *str, A_class post)                                                     
+{                                                                                      
+	printf("%s:(%d,%d,%d)\n", str, post.x, post.y, post.z);                            
+	return 0;                                                                          
+}
+</code>
+
+利用 gcc 工具编译 gcc a.c b.c c.c -o demo ，在运行 ./demo ,结果为: \\ 
+<code>
+fist point:(1,2,3)
+second point:(10,9,8)
+the vector is (9 7 5)
+</code>
+
+小结： 在 a.c 文件中定义全局变量 A_class local_post 结构体，并且调用 b.c 中的接口函数 A_class fun(int x, int y) 和 c.c 中的int print(char *str, A_class post), 在b.h 文件中，如果屏蔽掉 A_class 的实现，而在 b.h以外实现，此生将编译出错，由于 c.c 文件中用到 A_class 定义的类型，所以需要在该文件中包含 b.h。 \\ 
+这里需要说明的是，如果调用外部结构体等多层结构体变量时，需要对这种变量进行实现，使用时，加上模块的头文件即可，否则会报错。 \\ 
+实际工程中，模块化程序文件，一般提供一个 .c 和一个 .h 文件， 其中 .h 文件被 .c 文件调用， .h 文件中实现. \\ 
+
+==== 2. 用 extern 声明外部函数 ====
+
+a. 定义函数时，在函数的返回值类型前面加上extern 关键字，表示此函数时外部函数，可供其他文件调用，如 extern int func(int x, int y), C语言规定，此时 extern 可以省略，隐形为外部函数。\\ 
+b. 调用次函数时，需要用extern 对函数做出声明.  \\ 
+
+作用域: 使用 extern 声明能够在一个文件中调用其他文件的函数，即把被调用函数的作用域扩展到本文件。C语言中规定，声明时可以省略 extern \\ 
+例子： \\ 
+文件 a.c 的内容: \\ 
+<code c>
+#include <stdio.h>
+#include "b.h"
+
+int main(int argc, char *argv[])
+{
+	int x = 10, y = 5;
+	printf("x = 10, y = 5\n");
+	printf("x + y = %d\n", add(x, y));
+	printf("x - y = %d\n", sub(x, y));
+	printf("x * y = %d\n", mult(x, y));
+	printf("x / y = %d\n", div(x, y));
+	return 0;
+}
+</code>
+
+文件 b.h 的内容:
+<code c>
+#ifndef __F_H
+#define __F_H
+extern int add(int, int);
+extern int sub(int, int);
+extern int mult(int, int);
+extern int div(int, int);
+#endif
+</code>
+
+文件 b.c 的内容:
+
+<code c>
+#include <stdio.h>                                                                     
+
+int add(int x, int y)                                                                  
+{                                                                                      
+	return (x + y);                                                                    
+}                                                                                      
+
+int sub(int x, int y)                                                                  
+{                                                                                      
+	return x - y;                                                                      
+}                                                                                      
+
+int mult(int x, int y)                                                                 
+{                                                                                      
+	return x * y;                                                                      
+}                                                                                      
+
+int div(int x, int y)                                                                  
+{                                                                                      
+	if (y != 0) {                                                                      
+		return (x / y);                                                                
+	}                                                                                  
+
+	printf("mult()fail second para can not be zero!\n");                               
+	return -1;                                                                         
+}
+</code>
+
+利用 gcc 工具编译 gcc a.c b.c -o demo ，再运行 ./demo ， 结果为： \\ 
+<code c>
+x = 10, y = 5
+x + y = 15
+x - y = 5
+x * y = 50
+x / y = 2
+</code>
+
+小结：由上面简单的例子可以看出，在 b.h 文件中声明好 b.c 的函数，使用时，只需要在 a.c 中包含 #include "b.h" 头文件即可，这样就可以使用 b.c 的接口函数了，在实际工程中，通常也是采用这种方式， .c 文件中实现函数，.h文件中声明函数接口，需要调用.c文件的函数接口时，只需包含.h文件即可。 \\ 
+
+==== 3. 总结 ====
+
+在实际工程中，有两种情况比较多。一是利用 extern 只声明外部函数，不需要传递需要外部声明的变量，一个模块化接口文件对应一个声明接口的头文件，需要调用接口函数时，需要包含头文件。二是利用用extern 声明外部函数，同时声明需要传递的外部变量，做法和第一种情况一样，声明都放在头文件中，但是模块文件也需要包含该头文件。另外，如果结构体等比较复杂的变量，则需要包含其定义的头文件。另外，定义的外部变量属于全局变量，其存储方式为静态存储，生存周期为整个的生存周期。\\ 
 
