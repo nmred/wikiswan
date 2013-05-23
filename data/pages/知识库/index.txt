@@ -1,19 +1,11 @@
 ==== C  ====
   * [[知识库:c语言:c语言中static用法总结 | C语言中static用法总结]]
   * [[知识库:c语言:c语言中extern关键字详解|C语言中extern关键字详解]]
-  * [[c语言:SHELL代码规范|SHELL 代码规范]]
-  * [[c语言:JS代码规范|JS 代码规范]]
-  * [[c语言:HTML5_CSS代码规范|HTML5/CSS 代码规范]]
+  * [[知识库:c语言:index|更多......]]
 
-<code>
-#include <stdio.h>
-
-int main(void)
-{
-	
-}
-</code>
-==== PHP ====
+==== Unix 环境高级编程笔记 ====
+  * [[知识库:unix环境高级编程笔记:文件io | 文件IO]]
+  * [[知识库:unix环境高级编程笔记:index | 更多......]]
 
 ==== Linux ====
 
