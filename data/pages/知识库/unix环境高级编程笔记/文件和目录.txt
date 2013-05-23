@@ -1,0 +1,2 @@
+==== stat、fstat 和 lstat 函数 ====
+
