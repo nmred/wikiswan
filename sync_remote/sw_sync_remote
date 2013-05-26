@@ -153,7 +153,7 @@ class sw_sync_remote
 		$this->_create_file();
 
 		// 删除文件或目录
-		//$this->_delete_file();
+		$this->_delete_file();
 
 		// 将本次MD5文件保存
 		$this->_put_md5file();

@@ -378,3 +378,147 @@ symlink函数创建一个符号链接函数:
 int symlink(const char *actualpath, const char *sympath);
 // 返回值：若成功则返回0，若出错则返回 -1
 </code>
+
+该函数创建了一个指向actualpath的新目录项sympath,在创建此符号链接时，并不要求actualpath已经存在，并且，actualpath和sympath并不需要位于同一个文件系统。
+
+因为open函数跟随符号链接，所以需要有一种方法打开该链接本身，并读该链接中的名字.
+
+<code c>
+#include <unistd.h>
+
+ssize_t readlink(const char *restrict pathname, char *restrict buf, size_t bufsize);
+// 返回值：若成功则返回读到的字节数，若出错则返回-1
+</code>
+
+此函数组合了open,read和close的所有操作。如果此函数成功执行，则它返回读入buf的字节数，在buf中返回的符号链接的内容不以null字符终止。
+
+==== 文件时间 ====
+
+  * st_atime 文件数据的最后访问时间，read (ls -lu)
+  * st_mtime 文件数据的最后修改时间，write (ls 默认)
+  * st_ctime i节点状态的最后修改时间 chmod,chwon (ls -lc)
+
+注意修改时间(st_mtime) 和更改状态时间(st_ctime)之间的区别，修改时间文件内容最后一次被修改的时间，更改状态时间是该文件的i 节点最后一次被修改的时间。注意，文件并不保存对一个i节点的最后一次访问时间，所以access和stat函数并不更改这三个时间。
+
+==== utime函数 ====
+
+一个文件的访问和修改时间可以用utime函数更改。
+
+<code c>
+#include <utime.h>
+
+int utime(const char *pathname, const struct utimbuf *times);
+
+// 返回值：若成功则返回0， 若出错则返回 -1
+
+数据结构：
+struct utimbuf {
+	time_t actime; // access time
+	time_t modtime; // modify time	
+};
+</code>
+
+此函数的操作以及执行它所要求的特权取决于times参数是否是NULL:
+  * 如果times 是一个空指针，则访问时间和修改时间两者都设置为当前时间。
+  * 如果times 是非空指针，则访问时间和修改时间被设置为times所指向结构中的值。
+  
+注意，我们不能对更改状态时间st_ctime指定一个值，当调用utime函数时，此字段自动更新.
+
+<code c>
+#include "../apue.h"
+#include <fcntl.h>
+#include <utime.h>
+
+int main(int argc, char *argv[])
+{
+	int i, fd;
+	struct stat statbuf;
+	struct utimbuf timebuf;
+
+	for (i = 1; i < argc; i++) {
+		if (stat(argv[i], &statbuf) < 0) {
+			err_ret("%s : stat error", argv[i]);
+			continue;
+		}
+
+		if ((fd = open(argv[i], O_RDWR | O_TRUNC)) < 0) {
+			err_ret("%s : open error", argv[i]);
+			continue;
+		}
+		close(fd);
+
+		timebuf.actime = statbuf.st_atime;
+		timebuf.modtime = statbuf.st_mtime;
+
+		if (utime(argv[i], &timebuf) < 0) {
+			err_ret("%s : utime error", argv[i]);
+			continue;
+		}
+	}
+
+	exit(0);
+}
+</code>
+
+==== mkdir 和 rmdir 函数 ====
+
+用 mkdir 函数创建目录，用 rmdir 函数删除目录:
+
+<code c>
+#include <sys/stat.h>
+
+int mkdir(const char *pathname, mode_t mode);
+
+// 返回值：若成功则返回0，若出错则返回-1
+</code>
+
+此函数创建一个新的空目录，其中 . 和 .. 目录项自动创建的，所指定的文件访问权限mode 由进程的文件模式创建屏蔽字修改.
+
+常见的错误是指定与文件相同的mode(只指定读、写权限). 但是，对于目录通常至少要设置1个执行权限位，以允许访问该目录中的文件名.
+
+用rmdir 函数可以删除一个空目录，空目录是只包含. 和 .. 这两项的目录.
+
+<code c>
+#include <unistd.h>
+
+int rmdir(const char *pathname);
+
+// 返回值：若成功返回0，若出错则返回 -1
+</code>
+
+==== 读目录 ====
+
+<code c>
+#include <dirent.h>
+
+DIR *opendir(const char *pathname);
+// 返回值：若成功返回指针，若出错则返回NULL
+
+struct dirent *readdir(DIR *dp);
+// 返回值：若成功则返回指针，若在目录结尾或出错则返回NULL
+
+void rewinddir(DIR *dp);
+
+int closedir(DIR *dp);
+// 返回值：若成功则返回0，若出错则返回-1
+
+long telldir(DIR *dp);
+// 返回值：与dp 关联的目录中的当前位置
+
+void seekdir(DIR *dp, long loc);
+
+
+数据结构：
+
+struct dirent{
+	ino_t d_ino;
+	char d_name[NAME_MAX + 1];
+};
+</code>
+
+
+实例：递归降序遍历目录层次结构，并按文件类型计数
+
+<code c>
+
+</code>
