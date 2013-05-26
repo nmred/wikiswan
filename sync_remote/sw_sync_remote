@@ -1,0 +1,419 @@
+#!/usr/local/dev_swan/opt/php/bin/php
+<?php
+/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4 foldmethod=marker: */
+// +---------------------------------------------------------------------------
+// | SWAN [ $_SWANBR_SLOGAN_$ ]
+// +---------------------------------------------------------------------------
+// | Copyright $_SWANBR_COPYRIGHT_$
+// +---------------------------------------------------------------------------
+// | Version  $_SWANBR_VERSION_$
+// +---------------------------------------------------------------------------
+// | Licensed ( $_SWANBR_LICENSED_URL_$ )
+// +---------------------------------------------------------------------------
+// | $_SWANBR_WEB_DOMAIN_$
+// +---------------------------------------------------------------------------
+
+require_once 'dev_core.php';
+require_once PATH_DSWAN_LIB . 'iterator/sw_iterator_fetch_dir.class.php';
+require_once PATH_DSWAN_LIB . 'sw_create_makefile.class.php';
+require_once PATH_DSWAN_LIB . 'sw_ftp.class.php';
+
+class sw_sync_remote
+{
+ 	// {{{ const
+
+	/**
+	 *  本地 WIKI 的地址 
+	 */
+	const LOCAL_ROOT = '/usr/local/dev_swan/web/wiki/';
+
+	/**
+	 *  远程 WIKI 的地址 
+	 */
+	const REMOTE_ROOT = '/web/';
+
+	/**
+	 * 同步的相对目录  
+	 */
+	const SYNC_ROOT = 'data/pages';
+
+	/**
+	 * MD5 FILE  
+	 */
+	const MD5_FILE = 'md5file';
+
+	/**
+	 * 目录的标记  
+	 */
+	const DIR_SIG = 'd';
+
+	// }}}	
+	// {{{ members
+
+	/**
+	 * FTP 对象 
+	 * 
+	 * @var array
+	 * @access protected
+	 */
+	protected $__ftp;
+
+	/**
+	 * 本地文件信息列表 
+	 * 
+	 * @var array
+	 * @access protected
+	 */
+	protected $__local_files = array();
+
+	/**
+	 * 远程文件信息列表 
+	 * 
+	 * @var array
+	 * @access protected
+	 */
+	protected $__remote_files = array();
+
+	/**
+	 * 需要创建的文件 
+	 * 
+	 * @var array
+	 * @access protected
+	 */
+	protected $__create_file = array();
+
+	/**
+	 * 需要创建的目录 
+	 * 
+	 * @var array
+	 * @access protected
+	 */
+	protected $__create_dir = array();
+
+	/**
+	 * 删除的文件 
+	 * 
+	 * @var array
+	 * @access protected
+	 */
+	protected $__delete_file = array();
+
+	/**
+	 * 删除的目录 
+	 * 
+	 * @var array
+	 * @access protected
+	 */
+	protected $__delete_dir = array();
+
+	/**
+	 * 需要修改的文件 
+	 * 
+	 * @var array
+	 * @access protected
+	 */
+	protected $__modify_file = array();
+
+	// }}}
+	// {{{ functions
+	// {{{ public function __construct()
+
+	/**
+	 * __construct 
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	public function __construct($options)
+	{
+		$this->__ftp = new sw_ftp($options);
+	}
+
+	// }}}
+	// {{{ public function run()
+	
+	/**
+	 * 获取本地文件列表 
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	public function run()
+	{
+		// 获取本地的文件列表
+		$this->_get_local_files();
+
+		// 获取远程的文件列表
+		$this->_get_md5file();
+
+		// 比较文件差异
+		$this->_diff_file();
+
+		// 创建上传文件或目录
+		$this->_create_file();
+
+		// 删除文件或目录
+		//$this->_delete_file();
+
+		// 将本次MD5文件保存
+		$this->_put_md5file();
+	}
+
+	// }}}
+	// {{{ protected function _diff_file()
+	
+	/**
+	 * 查找需要修改/添加/删除 的文件或目录
+	 * 
+	 * @access protected
+	 * @return void
+	 */
+	protected function _diff_file()
+	{
+		foreach ($this->__local_files as $file_path => $md5) {
+			if (self::DIR_SIG === $md5) {
+				if (!isset($this->__remote_files[$file_path])) {
+					$this->__create_dir[] = $file_path;	
+				} else {
+					unset($this->__remote_files[$file_path]);	
+				}
+			} else {
+				if (!isset($this->__remote_files[$file_path])) {
+					$this->__create_file[] = $file_path;	
+				} else if ($this->__remote_files[$file_path] !== $md5) {
+					$this->__modify_file[] = $file_path;
+					unset($this->__remote_files[$file_path]);	
+				} else {
+					unset($this->__remote_files[$file_path]);	
+				}
+			}
+		}
+		
+		foreach ($this->__remote_files as $file_path => $md5) {
+			if (self::DIR_SIG === $md5) {
+				$this->__delete_dir[] = $file_path;
+			} else {
+				$this->__delete_file[] = $file_path;
+			}
+		}
+	}
+
+	// }}}
+	// {{{ protected function _create_file()
+	
+	/**
+	 * 上传文件或目录
+	 * 
+	 * @access protected
+	 * @return void
+	 */
+	protected function _create_file()
+	{
+		usort($this->__create_dir, array($this, '_sort_path_rev'));
+		foreach ($this->__create_dir as $file_path) {
+			echo "start mkdir `$file_path` \n";
+			$remote_path = $this->_local_to_remote($file_path);
+			$parent_dir = dirname($remote_path);
+			$dir_name = basename($remote_path);
+		    $dirs = $this->__ftp->get_list($parent_dir);
+			foreach ($dirs as $value) {
+				if ($value['name'] === $dir_name && $value['type'] == sw_ftp::DIR_TYPE) {
+					echo "dir `$file_path` is exists \n";
+					continue 2;	
+				}
+			}
+			try {
+				$this->__ftp->mk_dir($remote_path);
+			} catch (sw_exception $e) {
+				
+			}
+		}
+
+		$create_files = array_merge($this->__create_file, $this->__modify_file);
+		foreach ($create_files as $file_path) {
+			echo "start upload file `$file_path` \n";
+			$remote_path = $this->_local_to_remote($file_path);
+			$this->__ftp->put_file($file_path, $remote_path);
+		}
+	}
+
+	// }}}
+	// {{{ protected function _delete_file()
+	
+	/**
+	 * 删除文件或目录
+	 * 
+	 * @access protected
+	 * @return void
+	 */
+	protected function _delete_file()
+	{
+		foreach ($this->__delete_file as $file_path) {
+			echo "start delete file `$file_path` \n";
+			$remote_path = $this->_local_to_remote($file_path);
+			$this->__ftp->delete_file($remote_path);
+		}
+
+		usort($this->__delete_dir, array($this, '_sort_path'));
+		foreach ($this->__delete_dir as $file_path) {
+			echo "start delete `$file_path` \n";
+			$remote_path = $this->_local_to_remote($file_path);
+			$this->__ftp->rm_dir($remote_path);
+		}
+	}
+
+	// }}}
+	// {{{ protected function _get_local_files()
+	
+	/**
+	 * 获取本地文件列表 
+	 * 
+	 * @access protected
+	 * @return void
+	 */
+	protected function _get_local_files()
+	{
+		$files = array();
+		$sw_dir_iterator = new sw_iterator_fetch_dir(self::LOCAL_ROOT . self::SYNC_ROOT);
+		foreach ($sw_dir_iterator as $value) {
+			$file_name = $value->getFileName();
+			if ('..' == $file_name) {
+				continue;
+			}
+
+			$file_path = $value->getPathname();
+			$md5 = ($value->isFile()) ? md5_file($file_path) : self::DIR_SIG;
+			$files[$file_path] = $md5;
+		}
+		
+		$this->__local_files = $files;
+	}
+
+	// }}}
+	// {{{ protected function _put_md5file()
+	 
+	/**
+	 * 将本次的最新MD5值上传到服务器上 
+	 * 
+	 * @access protected
+	 * @return void
+	 */
+	protected function _put_md5file()
+	{
+		file_put_contents(self::MD5_FILE, json_encode($this->__local_files));
+
+		$this->__ftp->put_file(self::MD5_FILE, self::MD5_FILE);
+	}
+
+	// }}}
+	// {{{ protected function _local_to_remote()
+	 
+	/**
+	 * 将本地地址转化成远程地址 
+	 * 
+	 * @access protected
+	 * @return string
+	 */
+	protected function _local_to_remote($local)
+	{
+		$local_path = self::LOCAL_ROOT . self::SYNC_ROOT;
+		$remote_path = self::REMOTE_ROOT . self::SYNC_ROOT;
+
+		$local = rtrim($local, './');
+		return str_replace($local_path, $remote_path, $local);
+	}
+
+	// }}}
+	// {{{ protected function _get_md5file()
+	 
+	/**
+	 * 获取服务器上的MD5文件
+	 * 
+	 * @access protected
+	 * @return void
+	 */
+	protected function _get_md5file()
+	{
+		$this->__ftp->get_file(self::MD5_FILE, self::MD5_FILE);
+		$str = file_get_contents(self::MD5_FILE);
+		$this->__remote_files = json_decode($str, true);
+	}
+
+	// }}}
+	// {{{ protected function _sort_path()
+	 
+	/**
+	 * 为文件路径排序
+	 * 
+	 * @access protected
+	 * @return void
+	 */
+	protected function _sort_path($key1, $key2)
+	{
+		if (strlen($key1) < strlen($key2)) {
+			return 1;	
+		} else if (strlen($key1) == strlen($key2)) {
+			return 0;
+		} else {
+			return -1;	
+		}
+	}
+
+	// }}}
+	// {{{ protected function _sort_path_rev()
+	 
+	/**
+	 * 为文件路径排序
+	 * 
+	 * @access protected
+	 * @return void
+	 */
+	protected function _sort_path_rev($key1, $key2)
+	{
+		if (strlen($key1) < strlen($key2)) {
+			return -1;	
+		} else if (strlen($key1) == strlen($key2)) {
+			return 0;
+		} else {
+			return 1;	
+		}
+	}
+
+	// }}}
+	// }}}
+}
+
+// ini 配置文件
+//
+//host = '127.0.0.1'
+//username = ''
+//password = ''
+//
+
+$help = <<<EOD
+
+-c 指定配置文件
+-h 帮助
+
+EOD;
+
+$opt = getopt('c:h');
+
+if (isset($opt['h'])) {
+	echo $help;
+	exit(0);
+}
+
+if (!isset($opt['c'])) {
+	echo $help;
+	exit(1);	
+}
+
+if (!file_exists($opt['c'])) {
+	echo "config file is not exists\n";
+	exit(1);
+}
+
+$options = parse_ini_file($opt['c']);
+$sync = new sw_sync_remote($options);
+$sync->run();
