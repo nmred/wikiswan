@@ -770,4 +770,41 @@ int main(void)
 
 ==== 设备特殊文件 ====
 
+  * 每个文件系统所在的存储设备都由其主、次设备号表示。设备号所用的数据类型是基本系统数据类型 dev_t
+  * 我们通常可以使用两个宏即 major 和 minor来访问主、次设备号。大多数实现都定义了这两个宏。
+  * 系统中的每个文件关联的 st_dev 值是文件系统的设备号，该文件系统包含了这一文件名以及与其对应的 i 节点。
+  * 只有字符特殊文件和块特殊文件才有st_rdev 值，此值包含实际设备的设备号。
 
+打印 st_dev 和 st_rdev 值(在 linux 下未编译通过)
+
+<code c>
+#include "../apue.h"
+
+#ifdef SOLARIS
+#include <sys/mkdev.h>
+#endif
+
+int main(int argc, char *argv[])
+{
+	int i;
+	struct stat buf;
+
+	for (i = 1; i < argc; i++) {
+		printf("%s:", argv[i]);
+		if (stat(argv[i], &buf) < 0) {
+			err_ret("stat error");
+			continue;   
+		}   
+
+		printf("dev = %d/%d", major(buf.st_dev), minor(buf.st_dev));
+		if (S_ISBLK(buf.st_mode) || S_ISLNK(buf.st_mode)) {
+			printf(" (%s) rdev = %d/%d", (S_ISCHR(buf.st_mode)) ? "character" : "block",
+					major(buf.st_rdev), minor(buf.st_rdev));    
+		}                               
+
+		printf("\n");
+	}   
+
+	exit(0);
+}
+</code>
